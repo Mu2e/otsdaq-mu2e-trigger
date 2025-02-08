@@ -61,15 +61,16 @@ void TriggerConfigTable::init(ConfigurationManager* configManager)
   __COUT__ << configManager->__SELF_NODE__ << std::endl;
 
   auto childrenMap = configManager->__SELF_NODE__.getChildren();
-  __COUTT__ <<"printing children content"<<__E__;
-  __COUTT__ <<"TriggerDocName  : "<<childrenMap[0].second.getNode("TriggerDocName").getValue() << __E__;
-  __COUTT__ <<"TriggerConfigTag: "<<childrenMap[0].second.getNode("TriggerConfigTag").getValue() << __E__;
 
   //now download from MONGO-Db the trigger table to be used
   std::string    getTableFromMongoDb = "otsdaq_load_json_document ";
-  std::string    triggerTableName    = " testTriggerDoc ";
-  std::string    triggerTableVersion = " 0 ";
+  std::string    triggerTableName    = " "+childrenMap[0].second.getNode("TriggerDocName").getValue();//" testTriggerDoc ";
+  std::string    triggerTableVersion = " "+childrenMap[0].second.getNode("TriggerConfigTag").getValue()+" ";
   std::string    outputFileName      = ARTDAQ_FCL_PATH + "trigger_table.json";
+
+  __COUT__ <<"printing children content"<<__E__;
+  __COUT__ <<"TriggerDocName  : "<< triggerTableName << __E__;
+  __COUT__ <<"TriggerConfigTag: "<< triggerTableVersion << __E__;
   
   getTableFromMongoDb += triggerTableName + triggerTableVersion + outputFileName;
   system(getTableFromMongoDb.c_str());
@@ -77,10 +78,10 @@ void TriggerConfigTable::init(ConfigurationManager* configManager)
 
   __COUT__ << StringMacros::stackTrace() << __E__;
 
-  std::string      command  = "python mu2e-trig-config/python/generateMenuFromJSON.py";
+  std::string      command  = "generateMenuFromJSON.py";
   std::string      menuFile = " -mf " + outputFileName;//"mu2e_trig_config/data/physMenu.json";
   std::string      output   = " -o " + trigEpilogsDir;
-  std::string      evtMode  = " -evtMode All";
+  std::string      evtMode  = " -evtMode all";
   
   command += menuFile + output + evtMode;
   system(command.c_str());
