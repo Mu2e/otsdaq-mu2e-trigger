@@ -128,8 +128,8 @@ void TriggerConfigTable::init(ConfigurationManager *configManager) {
   //   {
   //	 __COUT__	<< "Main table name '" << topLevelPair.first << "'" <<
   //__E__; 	 auto triggerPaths =
-  //topLevelPair.second.getNode("LinkToTriggerPathsTable").getChildren(); 	 for
-  //(auto &triggerPathPair : triggerPaths)
+  // topLevelPair.second.getNode("LinkToTriggerPathsTable").getChildren();
+  // for (auto &triggerPathPair : triggerPaths)
   //	{
   //	  __COUT__	 << "children LOOP" << __E__;
   //	  __COUT__	 << "children Path '" << triggerPathPair.first << "'" <<
@@ -148,9 +148,9 @@ void TriggerConfigTable::init(ConfigurationManager *configManager) {
   //__E__;
 
   //	 auto triggerPaths =
-  //topLevelPair.second.getNode("LinkToTriggerPathsTable").getChildren(); 	 size_t
-  //children_map_size = triggerPaths.size(); 	 size_t counter(0); 	 std::vector<int>
-  //list_of_pathIDs;
+  // topLevelPair.second.getNode("LinkToTriggerPathsTable").getChildren();
+  // size_t children_map_size = triggerPaths.size(); 	 size_t counter(0);
+  // std::vector<int> list_of_pathIDs;
 
   //	 for (auto &triggerPathPair : triggerPaths)
   //	{
@@ -158,52 +158,52 @@ void TriggerConfigTable::init(ConfigurationManager *configManager) {
   //	  __COUT__	 << "Trigger Path '" << triggerPathPair.first << "'" <<
   //__E__;
   //	  __COUT__	 << "Trigger Name '" <<
-  //triggerPathPair.second.getNode("TriggerName").getValue() << "'" << __E__;
+  // triggerPathPair.second.getNode("TriggerName").getValue() << "'" << __E__;
 
   //	  std::string trigger_status =
-  //triggerPathPair.second.getNode("Status").getValue(); 	  if (trigger_status ==
-  //"Off"){
+  // triggerPathPair.second.getNode("Status").getValue(); 	  if
+  // (trigger_status == "Off"){
   //	    __COUT__	   << "Trigger status is Off" << __E__;
   //	    continue;
   //	  }
   //	  ots::ConfigurationTree singlePath =
-  //triggerPathPair.second.getNode("LinkToTriggerTable");
+  // triggerPathPair.second.getNode("LinkToTriggerTable");
   //	  __COUT__	 << "singlePath : " << singlePath << __E__;
   //	  __COUT__	 << "singlePath.isDisconnected : " <<
-  //singlePath.isDisconnected() << __E__;
+  // singlePath.isDisconnected() << __E__;
   //	  // __COUT__	    << "singlePath.getNode : " <<
-  //StringMacros::vectorToString(singlePath.getChildrenNames()) << __E__;
+  // StringMacros::vectorToString(singlePath.getChildrenNames()) << __E__;
   //	  // __COUT__	    << "singlePath.getConfigurationManager " <<
-  //singlePath.getConfigurationManager() << __E__;
+  // singlePath.getConfigurationManager() << __E__;
   //	  // __COUT__	    <<
   //"singlePath.getConfigurationManager()->getTableByName " <<
-  //singlePath.getConfigurationManager()->getTableByName("TriggerParameterTable")
+  // singlePath.getConfigurationManager()->getTableByName("TriggerParameterTable")
   //<< __E__;
 
   //	  std::string  triggerType =
-  //triggerPathPair.second.getNode("TriggerType").getValue<std::string>(); 	  int
-  //pathID	   = triggerPathPair.second.getNode("PathID").getValue<int>();
+  // triggerPathPair.second.getNode("TriggerType").getValue<std::string>();
+  // int pathID	   = triggerPathPair.second.getNode("PathID").getValue<int>();
 
   //	  __COUT__	 << "Trigger Type '" << triggerType << "'" << __E__;
 
   //	  //create the fcl housing the trigger-path configurations
   //	  epilogName = trigEpilogsDir + "/" + triggerPathPair.first + ".fcl";
   //	  allPathsFile << "#include \"Trigger_epilogs/" <<
-  //triggerPathPair.first<<".fcl\"" << __E__;
+  // triggerPathPair.first<<".fcl\"" << __E__;
   //	  //we need to append the line where we instantiate the given
-  //TriggerPath
+  // TriggerPath
   //	  //	  allPathsFile << "art.physics." << triggerPathPair.first  <<
   //"_trigger	 : [ @sequence::Trigger.paths."<< triggerPathPair.first<< " ]\n"
   //<< __E__;
   //	  // allPathsFile << "art.physics." << triggerPathPair.first  <<
   //"_trigger  : [ makeSD, CaloDigiMaker, @sequence::Trigger.paths."<<
-  //triggerPathPair.first<< " ]\n" << __E__;
+  // triggerPathPair.first<< " ]\n" << __E__;
   //	  //allPathsFile << "art.physics." << triggerPathPair.first  <<
   //"_trigger  : [ dtcEventVerifier, artFragFromDTCEvents, makeSD,
   //@sequence::Trigger.paths."<< triggerPathPair.first<< " ]" << __E__;
   //	  allPathsFile << "art.physics." << triggerPathPair.first  << "_trigger
   //: [ artFragFromDTCEvents, makeSD, @sequence::Trigger.paths."<<
-  //triggerPathPair.first<< " ]" << __E__; 	  allPathsFile <<
+  // triggerPathPair.first<< " ]" << __E__; 	  allPathsFile <<
   //"art.physics.trigger_paths["<< pathID <<"] : " << triggerPathPair.first  <<
   //"_trigger \n"<< __E__;
 
@@ -213,42 +213,42 @@ void TriggerConfigTable::init(ConfigurationManager *configManager) {
   //	  for (auto & id : list_of_pathIDs){
   //	    if (id == pathID){
   //	      __SS__ << "Attempt to use twice the same PathID : "<< pathID <<
-  //std::endl;
+  // std::endl;
   //	      __COUT_ERR__ << ss.str() << std::endl;
   //	      __SS_THROW__;
   //	    }
   //	  }
 
   //	  //create the directory that will house all the epilogs of a given
-  //triggerPath 	  std::string		    singlePathEpilogsDir,
-  //singlePathPairFclName;
+  // triggerPath 	  std::string		    singlePathEpilogsDir,
+  // singlePathPairFclName;
   //	  //		singlePathEpilogsDir = "%sTrigger_epilogs/%s",
   //(ARTDAQ_FCL_PATH).c_str(), triggerPathPair.first.c_str());
   //	  singlePathEpilogsDir = ARTDAQ_FCL_PATH + "Trigger_epilogs/" +
-  //triggerPathPair.first; 	  mkdir(singlePathEpilogsDir.c_str(), 0755);
+  // triggerPathPair.first; 	  mkdir(singlePathEpilogsDir.c_str(), 0755);
   //	  __COUT__	 << "single path epilogs dir " << singlePathEpilogsDir
   //<< __E__;
 
   //	  //set the general prescale factor at the beginning of the path
   //	  createPrescaleEpilog	       (epilogFclFile, singlePathEpilogsDir,
-  //triggerPathPair.first, triggerPathPair.second); //singlePath);
+  // triggerPathPair.first, triggerPathPair.second); //singlePath);
 
   //	  if (triggerType == "TrackSeed")
   //	    {
   //	      //to set up the Tracking filters we need to loop over the children
-  //of the corresponding node 	      createTrackingFiltersEpilog  (epilogFclFile,
-  //singlePathEpilogsDir, triggerPathPair.first, singlePath);
+  // of the corresponding node 	      createTrackingFiltersEpilog
+  // (epilogFclFile, singlePathEpilogsDir, triggerPathPair.first, singlePath);
   //	    }
   //	  else if (triggerType == "Helix")
   //	    {
   //	      singlePath.getNode("LinkToDigiFilterParameterTable");
   //	      createHelixFiltersEpilog	(epilogFclFile, singlePathEpilogsDir,
-  //triggerPathPair.first, singlePath);
+  // triggerPathPair.first, singlePath);
   //	    }
   //	  else if (triggerType == "DigiCount")
   //	    {
   //	      createDigiCountFiltersEpilog  (epilogFclFile,
-  //singlePathEpilogsDir, triggerPathPair.first, singlePath);
+  // singlePathEpilogsDir, triggerPathPair.first, singlePath);
   //	    }
 
   //	  __COUT__ <<" closing epilogFclFile" <<__E__;
@@ -258,7 +258,7 @@ void TriggerConfigTable::init(ConfigurationManager *configManager) {
 
   //	  ++counter;
   //	  __COUT__ <<"counter = " << counter <<", map-size = " <<
-  //children_map_size <<__E__;
+  // children_map_size <<__E__;
   //	  // if (counter == children_map_size-2) break;
   //	}//end loop over triggerPathPair
 
