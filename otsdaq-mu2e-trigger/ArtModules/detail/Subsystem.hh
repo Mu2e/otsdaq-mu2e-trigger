@@ -3,12 +3,8 @@
 
 namespace mu2e {
 namespace detail {
-enum class Subsystem
-{
-	Tracker,
-	Calorimeter
-};
+enum class Subsystem { Tracker, Calorimeter };
 }
-}  // namespace mu2e
+} // namespace mu2e
 
 #endif
