@@ -21,20 +21,17 @@ using namespace ots;
 #define PUSHCOMMENT commentStr += "# "
 #define POPCOMMENT commentStr.resize(commentStr.size() - 2)
 
-#undef __COUT__
-#define __COUT__ __COUT_TYPE__(TLVL_DEBUG + 10) << __COUT_HDR__
-
 //========================================================================================================================
 TriggerConfigTable::TriggerConfigTable(void) : TableBase("TriggerConfigTable")
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  //
 	//////////////////////////////////////////////////////////////////////
-	__COUT__ << "[TriggerConfigTable::TriggerConfigTable] Initializing the "
-	            "TriggerConfigTable plugin..."
-	         << __E__;
+	__COUTS__(10) << "[TriggerConfigTable::TriggerConfigTable] Initializing the "
+	                 "TriggerConfigTable plugin..."
+	              << __E__;
 	//  exit(0);
-	__COUT__ << StringMacros::stackTrace() << __E__;
+	__COUTS__(10) << StringMacros::stackTrace() << __E__;
 }  // end constructor
 
 //========================================================================================================================
@@ -57,8 +54,8 @@ void TriggerConfigTable::init(ConfigurationManager* configManager)
 	trigEpilogsDir      = ARTDAQ_FCL_PATH + fcl_dir;
 	mkdir(trigEpilogsDir.c_str(), 0755);
 
-	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
-	__COUT__ << configManager->__SELF_NODE__ << std::endl;
+	__COUTS__(10) << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
+	__COUTS__(10) << configManager->__SELF_NODE__ << std::endl;
 
 	auto childrenMap = configManager->__SELF_NODE__.getChildren();
 
@@ -71,14 +68,14 @@ void TriggerConfigTable::init(ConfigurationManager* configManager)
 	    " " + childrenMap[0].second.getNode("TriggerConfigTag").getValue() + " ";
 	std::string outputFileName = ARTDAQ_FCL_PATH + "trigger_table.json";
 
-	__COUT__ << "printing children content" << __E__;
-	__COUT__ << "TriggerDocName  : " << triggerTableName << __E__;
-	__COUT__ << "TriggerConfigTag: " << triggerTableVersion << __E__;
+	__COUTS__(10) << "printing children content" << __E__;
+	__COUTS__(10) << "TriggerDocName  : " << triggerTableName << __E__;
+	__COUTS__(10) << "TriggerConfigTag: " << triggerTableVersion << __E__;
 
 	getTableFromMongoDb += triggerTableName + triggerTableVersion + outputFileName;
 	system(getTableFromMongoDb.c_str());
 
-	__COUT__ << StringMacros::stackTrace() << __E__;
+	__COUTS__(10) << StringMacros::stackTrace() << __E__;
 
 	std::string command = "generateMenuFromJSON.py";
 	std::string menuFile =
@@ -117,31 +114,31 @@ void TriggerConfigTable::init(ConfigurationManager* configManager)
 	// the trigger paths triggerFclFile << "#include
 	// \"Trigger_epilogs/allPaths.fcl\""<<__E__;
 
-	// __COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
-	// __COUT__ << configManager->__SELF_NODE__ << std::endl;
+	// __COUTS__(10) << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
+	// __COUTS__(10) << configManager->__SELF_NODE__ << std::endl;
 
 	// auto childrenMap = configManager->__SELF_NODE__.getChildren();
-	// __COUT__ <<"printing children content"<<__E__;
-	// __COUT__ <<"children map size"<<childrenMap.size() << __E__;
+	// __COUTS__(10) <<"printing children content"<<__E__;
+	// __COUTS__(10) <<"children map size"<<childrenMap.size() << __E__;
 
 	// for (auto &topLevelPair : childrenMap)
 	//   {
-	//	 __COUT__	<< "Main table name '" << topLevelPair.first << "'" <<
+	//	 __COUTS__(10)	<< "Main table name '" << topLevelPair.first << "'" <<
 	//__E__; 	 auto triggerPaths =
 	// topLevelPair.second.getNode("LinkToTriggerPathsTable").getChildren();
 	// for (auto &triggerPathPair : triggerPaths)
 	//	{
-	//	  __COUT__	 << "children LOOP" << __E__;
-	//	  __COUT__	 << "children Path '" << triggerPathPair.first << "'" <<
+	//	  __COUTS__(10)	 << "children LOOP" << __E__;
+	//	  __COUTS__(10)	 << "children Path '" << triggerPathPair.first << "'" <<
 	//__E__;
 	//	}
 	//   }
-	// __COUT__ <<"children map printed..." <<__E__;
+	// __COUTS__(10) <<"children map printed..." <<__E__;
 
 	// for (auto &topLevelPair : childrenMap)
 	//   {
-	//	 __COUT__	<< "top LOOP" << __E__;
-	//	 __COUT__	<< "Top Level '" << topLevelPair.first << "'" << __E__;
+	//	 __COUTS__(10)	<< "top LOOP" << __E__;
+	//	 __COUTS__(10)	<< "Top Level '" << topLevelPair.first << "'" << __E__;
 	//	 // triggerFclFile << "Top Level '" << topLevelPair.first << "'" <<
 	//__E__;
 	//	 // triggerFclFile << "Node name '" << topLevelPair.second << "'" <<
@@ -154,28 +151,28 @@ void TriggerConfigTable::init(ConfigurationManager* configManager)
 
 	//	 for (auto &triggerPathPair : triggerPaths)
 	//	{
-	//	  __COUT__	 << "internal LOOP" << __E__;
-	//	  __COUT__	 << "Trigger Path '" << triggerPathPair.first << "'" <<
+	//	  __COUTS__(10)	 << "internal LOOP" << __E__;
+	//	  __COUTS__(10)	 << "Trigger Path '" << triggerPathPair.first << "'" <<
 	//__E__;
-	//	  __COUT__	 << "Trigger Name '" <<
+	//	  __COUTS__(10)	 << "Trigger Name '" <<
 	// triggerPathPair.second.getNode("TriggerName").getValue() << "'" << __E__;
 
 	//	  std::string trigger_status =
 	// triggerPathPair.second.getNode("Status").getValue(); 	  if
 	// (trigger_status == "Off"){
-	//	    __COUT__	   << "Trigger status is Off" << __E__;
+	//	    __COUTS__(10)	   << "Trigger status is Off" << __E__;
 	//	    continue;
 	//	  }
 	//	  ots::ConfigurationTree singlePath =
 	// triggerPathPair.second.getNode("LinkToTriggerTable");
-	//	  __COUT__	 << "singlePath : " << singlePath << __E__;
-	//	  __COUT__	 << "singlePath.isDisconnected : " <<
+	//	  __COUTS__(10)	 << "singlePath : " << singlePath << __E__;
+	//	  __COUTS__(10)	 << "singlePath.isDisconnected : " <<
 	// singlePath.isDisconnected() << __E__;
-	//	  // __COUT__	    << "singlePath.getNode : " <<
+	//	  // __COUTS__(10)	    << "singlePath.getNode : " <<
 	// StringMacros::vectorToString(singlePath.getChildrenNames()) << __E__;
-	//	  // __COUT__	    << "singlePath.getConfigurationManager " <<
+	//	  // __COUTS__(10)	    << "singlePath.getConfigurationManager " <<
 	// singlePath.getConfigurationManager() << __E__;
-	//	  // __COUT__	    <<
+	//	  // __COUTS__(10)	    <<
 	//"singlePath.getConfigurationManager()->getTableByName " <<
 	// singlePath.getConfigurationManager()->getTableByName("TriggerParameterTable")
 	//<< __E__;
@@ -184,7 +181,7 @@ void TriggerConfigTable::init(ConfigurationManager* configManager)
 	// triggerPathPair.second.getNode("TriggerType").getValue<std::string>();
 	// int pathID	   = triggerPathPair.second.getNode("PathID").getValue<int>();
 
-	//	  __COUT__	 << "Trigger Type '" << triggerType << "'" << __E__;
+	//	  __COUTS__(10)	 << "Trigger Type '" << triggerType << "'" << __E__;
 
 	//	  //create the fcl housing the trigger-path configurations
 	//	  epilogName = trigEpilogsDir + "/" + triggerPathPair.first + ".fcl";
@@ -226,7 +223,7 @@ void TriggerConfigTable::init(ConfigurationManager* configManager)
 	//(ARTDAQ_FCL_PATH).c_str(), triggerPathPair.first.c_str());
 	//	  singlePathEpilogsDir = ARTDAQ_FCL_PATH + "Trigger_epilogs/" +
 	// triggerPathPair.first; 	  mkdir(singlePathEpilogsDir.c_str(), 0755);
-	//	  __COUT__	 << "single path epilogs dir " << singlePathEpilogsDir
+	//	  __COUTS__(10)	 << "single path epilogs dir " << singlePathEpilogsDir
 	//<< __E__;
 
 	//	  //set the general prescale factor at the beginning of the path
@@ -251,25 +248,25 @@ void TriggerConfigTable::init(ConfigurationManager* configManager)
 	// singlePathEpilogsDir, triggerPathPair.first, singlePath);
 	//	    }
 
-	//	  __COUT__ <<" closing epilogFclFile" <<__E__;
+	//	  __COUTS__(10) <<" closing epilogFclFile" <<__E__;
 
 	//	  epilogFclFile.close();
-	//	  __COUT__ << "epilogFclFile closed... " << __E__;
+	//	  __COUTS__(10) << "epilogFclFile closed... " << __E__;
 
 	//	  ++counter;
-	//	  __COUT__ <<"counter = " << counter <<", map-size = " <<
+	//	  __COUTS__(10) <<"counter = " << counter <<", map-size = " <<
 	// children_map_size <<__E__;
 	//	  // if (counter == children_map_size-2) break;
 	//	}//end loop over triggerPathPair
 
-	//	 __COUT__ <<" end of main LOOP" <<__E__;
+	//	 __COUTS__(10) <<" end of main LOOP" <<__E__;
 
 	//   }//end loop over topLevelPair
 
-	// __COUT__ << "loop completed closed... " << __E__;
+	// __COUTS__(10) << "loop completed closed... " << __E__;
 
 	// triggerFclFile.close();
-	// __COUT__ << "triggerFclFile closed... " << __E__;
+	// __COUTS__(10) << "triggerFclFile closed... " << __E__;
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -281,7 +278,7 @@ std::string TriggerConfigTable::GetModuleNameFromPath(std::string& TrigPath)
 	std::string del("_");
 	std::string name(TrigPath);
 	std::string newName = "";
-	__COUT__ << "TrigPath = " << TrigPath << __E__;
+	__COUTS__(10) << "TrigPath = " << TrigPath << __E__;
 
 	auto pos = name.find(del);
 	if(pos == std::string::npos)
@@ -292,7 +289,7 @@ std::string TriggerConfigTable::GetModuleNameFromPath(std::string& TrigPath)
 	{
 		newName = name.substr(0, pos);
 		name.erase(0, pos + del.length());
-		__COUT__ << "newName = " << newName << ", name = " << name << __E__;
+		__COUTS__(10) << "newName = " << newName << ", name = " << name << __E__;
 
 		// while(name.length() >0)
 		do
@@ -312,7 +309,8 @@ std::string TriggerConfigTable::GetModuleNameFromPath(std::string& TrigPath)
 				newName += token;
 			}
 			name.erase(0, pos + del.length());
-			__COUT__ << "[while ] newName = " << newName << ", name = " << name << __E__;
+			__COUTS__(10) << "[while ] newName = " << newName << ", name = " << name
+			              << __E__;
 
 		} while(name.length() > 0);  // name.find(del) != std::string::npos);
 	}
