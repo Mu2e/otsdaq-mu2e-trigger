@@ -28,8 +28,8 @@ TriggerConfigTable::TriggerConfigTable(void) : TableBase("TriggerConfigTable")
 	// WARNING: the names used in C++ MUST match the Table INFO  //
 	//////////////////////////////////////////////////////////////////////
 	__COUTS__(10) << "[TriggerConfigTable::TriggerConfigTable] Initializing the "
-	            "TriggerConfigTable plugin..."
-	         << __E__;
+	                 "TriggerConfigTable plugin..."
+	              << __E__;
 	//  exit(0);
 	__COUTS__(10) << StringMacros::stackTrace() << __E__;
 }  // end constructor
@@ -309,7 +309,8 @@ std::string TriggerConfigTable::GetModuleNameFromPath(std::string& TrigPath)
 				newName += token;
 			}
 			name.erase(0, pos + del.length());
-			__COUTS__(10) << "[while ] newName = " << newName << ", name = " << name << __E__;
+			__COUTS__(10) << "[while ] newName = " << newName << ", name = " << name
+			              << __E__;
 
 		} while(name.length() > 0);  // name.find(del) != std::string::npos);
 	}
