@@ -1,31 +1,31 @@
 #ifndef _ots_TriggerConfigTable_h_
 #define _ots_TriggerConfigTable_h_
 
-#include "otsdaq/TableCore/TableBase.h"
-#include "otsdaq/ConfigurationInterface/ConfigurationManager.h"
-#include <string>
+#include <fstream>  // std::fstream
 #include <iostream>
-#include <fstream>      // std::fstream
+#include <string>
+#include "otsdaq/ConfigurationInterface/ConfigurationManager.h"
+#include "otsdaq/TableCore/TableBase.h"
 
 namespace ots
 {
 
-  class TriggerConfigTable : public TableBase
+class TriggerConfigTable : public TableBase
 {
-
-public:
-
+  public:
 	TriggerConfigTable(void);
 	virtual ~TriggerConfigTable(void);
 
-	//Methods
-	void   init                          (ConfigurationManager *configManager);
-	void    createTriggerMenuFiles        (std::ofstream& EpilogFclFile, std::string& EpilogDir, std::string& TrigPath, ots::ConfigurationTree  ConfTree);	
-	std::string GetModuleNameFromPath    (std::string &TrigPath);
+	// Methods
+	void        init(ConfigurationManager* configManager);
+	void        createTriggerMenuFiles(std::ofstream&         EpilogFclFile,
+	                                   std::string&           EpilogDir,
+	                                   std::string&           TrigPath,
+	                                   ots::ConfigurationTree ConfTree);
+	std::string GetModuleNameFromPath(std::string& TrigPath);
 
-
-private:
-	bool 	isFirstAppInContext_;
+  private:
+	bool isFirstAppInContext_;
 };
-}
+}  // namespace ots
 #endif
