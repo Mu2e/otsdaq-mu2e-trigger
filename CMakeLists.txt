@@ -33,6 +33,7 @@ cet_set_compiler_flags(DIAGS VIGILANT
 find_package(otsdaq-mu2e 1.02.00 REQUIRED)
 
 # Mu2e Offline Extra setup
+find_package(Offline v11_00_00 REQUIRED)
 include_directories($ENV{BTRK_INC} $ENV{KINKAL_INC})
 link_directories($ENV{BTRK_LIB} $ENV{KINKAL_LIB})
 
