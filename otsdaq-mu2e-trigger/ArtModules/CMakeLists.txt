@@ -1,3 +1,11 @@
+
+cet_build_plugin(LumiStreamFilter art::module
+    LIBRARIES REG
+      Offline::DAQ
+      Offline::RecoDataProducts
+      artdaq::DAQdata
+)
+
 cet_build_plugin(Mu2ePrescaler art::module
   LIBRARIES REG
   fhiclcpp::types
