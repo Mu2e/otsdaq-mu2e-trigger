@@ -23,9 +23,6 @@ class TriggerConfigTable : public TableBase
 	                                   std::string&           TrigPath,
 	                                   ots::ConfigurationTree ConfTree);
 	std::string GetModuleNameFromPath(std::string& TrigPath);
-
-  private:
-	bool isFirstAppInContext_;
 };
 }  // namespace ots
 #endif

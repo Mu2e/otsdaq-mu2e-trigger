@@ -17,11 +17,8 @@ class OfflineDatabaseTable : public TableBase
 	virtual ~OfflineDatabaseTable(void);
 
 	// Methods
-	void        init(ConfigurationManager* configManager);
-	void        createTriggerFcl(std::ofstream&         fclFileOut, ConfigurationManager* configManager);
-
-  private:
-	bool isFirstAppInContext_;
+	void init(ConfigurationManager* configManager);
+	void createTriggerFcl(std::ofstream& fclFileOut, ConfigurationManager* configManager);
 };
 }  // namespace ots
 #endif

@@ -14,7 +14,8 @@ using namespace ots;
 // const std::string SubsystemCalorimeterParametersTable::PATH_TO_TRIGGER_OFFLINE_DB = getenv("PATH_TO_TRIGGER_OFFLINE_DB") ? getenv("PATH_TO_TRIGGER_OFFLINE_DB") : "";
 
 #define ARTDAQ_FCL_PATH std::string(getenv("OTS_SCRATCH")) + "/TriggerConfigurations/"
-#define ARTDAQ_FILE_PREAMBLE "boardReader"
+
+#define OFFLINE_DBSERVICE_VERBOSE std::string(getenv("OFFLINE_DBSERVICE_VERBOSE") ? getenv("OFFLINE_DBSERVICE_VERBOSE") : "0")
 
 // helpers
 #define OUT out << tabStr << commentStr
@@ -60,8 +61,6 @@ void OfflineDatabaseTable::init(ConfigurationManager* configManager)
 	__COUTS__(10) << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
 	__COUTS__(10) << configManager->__SELF_NODE__ << std::endl;
 
-	auto childrenMap = configManager->__SELF_NODE__.getChildren();
-
 	// Need to generate this:
 	// 		services : {
 	// 		  DbService : {
@@ -75,47 +74,53 @@ void OfflineDatabaseTable::init(ConfigurationManager* configManager)
 
 	// Process childrenMap to extract child pairs and write in required format
 	std::ofstream outFile(outFilename);
-	if(outFile.is_open())
-	{
-		std::string tabStr     = "";
-		std::string commentStr = "";
-
-		outFile << tabStr << "services : {" << std::endl;
-		PUSHTAB;
-		outFile << tabStr << "DbService : {" << std::endl;
-		PUSHTAB;
-		outFile << tabStr << "purpose :  EMPTY" << std::endl;
-		outFile << tabStr << "version : v0   # ignored" << std::endl;
-		outFile << tabStr << "dbName : \"mu2e_conditions_prd\"  # ignored" << std::endl;
-
-		// Create textFile array with first_second.txt format
-		outFile << tabStr << "textFile : [";
-		bool first = true;
-		for(const auto& pair : childrenMap)
-		{
-			if(!first)
-			{
-				outFile << ", ";
-			}
-			outFile << "\"" << pair.first << "_" << pair.second.getNode("CID").getValue<std::string>()
-			        << ".txt\"";
-			first = false;
-		}
-		outFile << "]   # provide everything needed" << std::endl;
-
-		outFile << tabStr << "verbose : 1" << std::endl;
-		POPTAB;
-		outFile << tabStr << "}" << std::endl;
-		POPTAB;
-		outFile << tabStr << "}" << std::endl;
-		outFile.close();
-	}
-	else
+	if(!outFile.is_open())
 	{
 		__SS__ << "Offline Database output file could not be opened at path: "
 		       << outFilename << __E__;
 		__SS_THROW__;
 	}
-}
+	createTriggerFcl(outFile, configManager);
+	outFile.close();
+
+}  // end init()
+
+//========================================================================================================================
+void OfflineDatabaseTable::createTriggerFcl(std::ofstream& outFile, ConfigurationManager* configManager)
+{
+	auto childrenMap = configManager->__SELF_NODE__.getChildren();
+
+	std::string tabStr     = "";
+	std::string commentStr = "";
+
+	// outFile << tabStr << "services : {" << std::endl;
+	// PUSHTAB;
+	outFile << tabStr << "art.services.DbService : {" << std::endl;
+	PUSHTAB;
+	outFile << tabStr << "purpose :  EMPTY" << std::endl;
+	outFile << tabStr << "version : v0   # ignored" << std::endl;
+	outFile << tabStr << "dbName : \"mu2e_conditions_prd\"  # ignored" << std::endl;
+
+	// Create textFile array with first_second.txt format
+	outFile << tabStr << "textFile : [";
+	bool first = true;
+	for(const auto& pair : childrenMap)
+	{
+		if(!first)
+		{
+			outFile << ", ";
+		}
+		outFile << "\"" << pair.first << "_"
+				<< pair.second.getNode("CID").getValue<std::string>() << ".txt\"";
+		first = false;
+	}
+	outFile << "]   # provide everything needed" << std::endl;
+
+	outFile << tabStr << "verbose : " << OFFLINE_DBSERVICE_VERBOSE << std::endl;
+	POPTAB;
+	outFile << tabStr << "}" << std::endl;
+	// POPTAB;
+	// outFile << tabStr << "}" << std::endl;
+} //end createTriggerFcl()
 
 DEFINE_OTS_TABLE(OfflineDatabaseTable)
