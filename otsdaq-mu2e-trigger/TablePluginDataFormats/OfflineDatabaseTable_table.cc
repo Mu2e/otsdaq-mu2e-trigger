@@ -97,7 +97,7 @@ void OfflineDatabaseTable::init(ConfigurationManager* configManager)
 			{
 				outFile << ", ";
 			}
-			outFile << "\"" << pair.first << "_" << pair.second.getValue<std::string>()
+			outFile << "\"" << pair.first << "_" << pair.second.getNode("CID").getValue<std::string>()
 			        << ".txt\"";
 			first = false;
 		}
