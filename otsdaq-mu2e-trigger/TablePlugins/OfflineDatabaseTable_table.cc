@@ -15,7 +15,9 @@ using namespace ots;
 
 #define ARTDAQ_FCL_PATH std::string(getenv("OTS_SCRATCH")) + "/TriggerConfigurations/"
 
-#define OFFLINE_DBSERVICE_VERBOSE std::string(getenv("OFFLINE_DBSERVICE_VERBOSE") ? getenv("OFFLINE_DBSERVICE_VERBOSE") : "0")
+#define OFFLINE_DBSERVICE_VERBOSE \
+	std::string(                  \
+	    getenv("OFFLINE_DBSERVICE_VERBOSE") ? getenv("OFFLINE_DBSERVICE_VERBOSE") : "0")
 
 // helpers
 #define OUT out << tabStr << commentStr
@@ -86,7 +88,8 @@ void OfflineDatabaseTable::init(ConfigurationManager* configManager)
 }  // end init()
 
 //========================================================================================================================
-void OfflineDatabaseTable::createTriggerFcl(std::ofstream& outFile, ConfigurationManager* configManager)
+void OfflineDatabaseTable::createTriggerFcl(std::ofstream&        outFile,
+                                            ConfigurationManager* configManager)
 {
 	auto childrenMap = configManager->__SELF_NODE__.getChildren();
 
@@ -111,7 +114,7 @@ void OfflineDatabaseTable::createTriggerFcl(std::ofstream& outFile, Configuratio
 			outFile << ", ";
 		}
 		outFile << "\"" << pair.first << "_"
-				<< pair.second.getNode("CID").getValue<std::string>() << ".txt\"";
+		        << pair.second.getNode("CID").getValue<std::string>() << ".txt\"";
 		first = false;
 	}
 	outFile << "]   # provide everything needed" << std::endl;
@@ -121,6 +124,6 @@ void OfflineDatabaseTable::createTriggerFcl(std::ofstream& outFile, Configuratio
 	outFile << tabStr << "}" << std::endl;
 	// POPTAB;
 	// outFile << tabStr << "}" << std::endl;
-} //end createTriggerFcl()
+}  //end createTriggerFcl()
 
 DEFINE_OTS_TABLE(OfflineDatabaseTable)
