@@ -1,4 +1,4 @@
-#include "otsdaq-mu2e-trigger/TablePluginDataFormats/OfflineDatabaseTable.h"
+#include "otsdaq-mu2e-trigger/TablePlugins/OfflineDatabaseTable.h"
 #include "otsdaq/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq/Macros/TablePluginMacros.h"
 
