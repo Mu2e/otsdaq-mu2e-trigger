@@ -19,11 +19,6 @@ class TriggerConfigTable : public TableBase
 
 	//Methods
 	void        init						(ConfigurationManager* configManager);
-	void        createTriggerMenuFiles		(std::ofstream&         EpilogFclFile,
-	                                  		 std::string&           EpilogDir,
-	                                  		 std::string&           TrigPath,
-	                                  		 ots::ConfigurationTree ConfTree);
-	std::string GetModuleNameFromPath		(std::string& TrigPath);
 };
 // clang-format on
 }  // namespace ots
