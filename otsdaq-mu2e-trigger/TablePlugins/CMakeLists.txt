@@ -1,13 +1,12 @@
 
 include(otsdaq::table)
   
-cet_build_plugin(TopLevelTriggerTable otsdaq::table LIBRARIES REG
-  )
-
 cet_build_plugin(TriggerConfigTable otsdaq::table LIBRARIES REG
   )
 
 
+cet_build_plugin(OfflineDatabaseTable otsdaq::table LIBRARIES REG
+  )
   
 install_headers()
 install_source()
