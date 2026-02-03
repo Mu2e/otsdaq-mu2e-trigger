@@ -58,6 +58,13 @@ void TriggerConfigTable::init(ConfigurationManager* configManager)
 	__COUTS__(10) << "printing children content" << __E__;
 	__COUTS__(10) << "children map size" << childrenMap.size() << __E__;
 
+	if(childrenMap.empty())
+	{
+		__SS__ << "There is no record in the table '" << configManager->__SELF_NODE__.getTableName() 
+			<< "' - the first record is required to define the Trigger Menu document and tag!" << __E__;
+		__SS_THROW__;
+	}
+
 	auto& topLevelPair = childrenMap.at(0);
 	__COUTS__(10) << "Main table name '" << topLevelPair.first << "'" << __E__;
 
@@ -74,7 +81,7 @@ void TriggerConfigTable::init(ConfigurationManager* configManager)
 		if(!((triggerTableName[c] >= 'a' && triggerTableName[c] <= 'z') ||
 		     (triggerTableName[c] >= 'A' && triggerTableName[c] <= 'Z') ||
 		     (triggerTableName[c] >= '0' && triggerTableName[c] <= '9') ||
-		     triggerTableName[c] >= '_' || triggerTableName[c] <= '-'))
+		     triggerTableName[c] == '_' || triggerTableName[c] == '-'))
 		{
 			__SS__ << "Illegal character found in triggerTableName '" << triggerTableName
 			       << "' ... only alpha-numeric, dashes, and underscores allowed."
