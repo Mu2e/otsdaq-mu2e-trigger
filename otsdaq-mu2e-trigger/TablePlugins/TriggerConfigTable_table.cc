@@ -1,4 +1,4 @@
-#include "otsdaq-mu2e-trigger/TablePluginDataFormats/TriggerConfigTable.h"
+#include "otsdaq-mu2e-trigger/TablePlugins/TriggerConfigTable.h"
 #include "otsdaq/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq/Macros/TablePluginMacros.h"
 // #include "otsdaq/tools/otsdaq_load_json_document.cc"

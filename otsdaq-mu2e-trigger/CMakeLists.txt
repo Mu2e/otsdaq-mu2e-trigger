@@ -1,4 +1,4 @@
 
-add_subdirectory(TablePluginDataFormats)
+add_subdirectory(TablePlugins)
 add_subdirectory(ArtModules)
 

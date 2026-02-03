@@ -20,4 +20,5 @@ setupARTDAQOTS
 *.vcxproj*
 CMakePresets.json
 build-linux-*
-spack-build-* 
+spack-build-*
+_codeql_detected_source_root
