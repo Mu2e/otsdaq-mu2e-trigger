@@ -21,9 +21,6 @@ using namespace ots;
 #define PUSHCOMMENT commentStr += "# "
 #define POPCOMMENT commentStr.resize(commentStr.size() - 2)
 
-#undef __COUTS__(10)
-#define __COUTS__(10) __COUT_TYPE__(TLVL_DEBUG + 10) << __COUT_HDR__
-
 //========================================================================================================================
 TriggerConfigTable::TriggerConfigTable(void) : TableBase("TriggerConfigTable")
 {
@@ -63,20 +60,19 @@ void TriggerConfigTable::init(ConfigurationManager* configManager)
 
 	auto& topLevelPair = childrenMap.at(0);
 	__COUTS__(10) << "Main table name '" << topLevelPair.first << "'" << __E__;
-	auto triggerMenuName    = topLevelPair.second.getNode("TriggerDocName").getValue();
-	auto triggerMenuVersion = topLevelPair.second.getNode("TriggerConfigTag").getValue();
 
 	//now download from MONGO-Db the trigger table to be used
 	std::string getTableFromMongoDb = "otsdaq_load_json_document ";
-	std::string triggerTableName    = triggerMenuName;     //" testTriggerDoc ";
-	std::string triggerTableVersion = triggerMenuVersion;  //" 6 ";
+	std::string triggerTableName    = topLevelPair.second.getNode("TriggerDocName").getValue();     //" testTriggerDoc ";
+	std::string triggerTableVersion = topLevelPair.second.getNode("TriggerConfigTag").getValue();  //" 6 ";
 	std::string outputFileName      = ARTDAQ_FCL_PATH + "/physMenu.json";
 
 	getTableFromMongoDb +=
 	    triggerTableName + " " + triggerTableVersion + " " + outputFileName;
 	__COUTS__(10) << "otsdaq_load_json command: " << getTableFromMongoDb << __E__;
-	;
-	system(getTableFromMongoDb.c_str());
+	
+	int statusCode = system(getTableFromMongoDb.c_str());
+	__COUTVS__(10,statusCode);
 
 	__COUTS__(10) << StringMacros::stackTrace() << __E__;
 
@@ -87,7 +83,8 @@ void TriggerConfigTable::init(ConfigurationManager* configManager)
 	std::string evtMode  = " -evtMode all";
 
 	command += menuFile + output + evtMode;
-	system(command.c_str());
+	statusCode = system(command.c_str());
+	__COUTVS__(10,statusCode);
 
 	// //create the fcl file
 	// std::ofstream      triggerFclFile, epilogFclFile, subEpilogFclFile, allPathsFile;
