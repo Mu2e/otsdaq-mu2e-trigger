@@ -40,12 +40,39 @@ TriggerConfigTable::~TriggerConfigTable(void) {}
 //========================================================================================================================
 void TriggerConfigTable::init(ConfigurationManager* configManager)
 {
+	__COUTS__(10) << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << __E__;
+	__COUTS__(10) << configManager->__SELF_NODE__ << __E__;
+
 	isFirstAppInContext_ = configManager->isOwnerFirstAppInContext();
 
 	__COUTV__(isFirstAppInContext_);
 	if(!isFirstAppInContext_)
 		return;
+} //end init()
 
+//========================================================================================================================
+void TriggerConfigTable::initPrereqsForARTDAQ(const ConfigurationManager* configManager)
+{	
+	__COUTS__(50) << "initPrereqsForARTDAQ()" << __E__;
+	__COUTS__(51) << StringMacros::stackTrace() << __E__;
+	
+	bool needToGenerate = false;
+	//lock for scope to check if need to generate in this thread
+	std::lock_guard<std::mutex> lock(prereqsGeneratedMutex_);
+	if(!prereqsGenerated_)
+		needToGenerate = true;
+		
+	
+	if(!needToGenerate) //then wait for generation
+	{
+		__COUTS__(10) << "initPrereqsForARTDAQ() already generated!" << __E__;
+		return; //done!
+	}
+
+	__COUTS__(10) << "initPrereqsForARTDAQ() generating!" << __E__;
+	__COUTS__(11) << StringMacros::stackTrace() << __E__;
+
+	
 	//make directory just in case
 	mkdir((ARTDAQ_FCL_PATH).c_str(), 0755);
 
@@ -55,7 +82,6 @@ void TriggerConfigTable::init(ConfigurationManager* configManager)
 	mkdir(trigEpilogsDir.c_str(), 0755);
 
 	auto childrenMap = configManager->__SELF_NODE__.getChildren();
-	__COUTS__(10) << "printing children content" << __E__;
 	__COUTS__(10) << "children map size" << childrenMap.size() << __E__;
 
 	if(childrenMap.empty())
@@ -69,7 +95,6 @@ void TriggerConfigTable::init(ConfigurationManager* configManager)
 	__COUTS__(10) << "Main table name '" << topLevelPair.first << "'" << __E__;
 
 	//now download from MONGO-Db the trigger table to be used
-	std::string getTableFromMongoDb = "otsdaq_load_json_document ";
 	std::string triggerTableName =
 	    topLevelPair.second.getNode("TriggerDocName").getValue();  //" testTriggerDoc ";
 	std::string triggerTableVersion =
@@ -98,25 +123,38 @@ void TriggerConfigTable::init(ConfigurationManager* configManager)
 			__SS_THROW__;
 		}
 
+	std::string getTableFromMongoDb = "otsdaq_load_json_document ";
 	getTableFromMongoDb +=
 	    triggerTableName + " " + triggerTableVersion + " " + outputFileName;
 	__COUTS__(10) << "otsdaq_load_json command: " << getTableFromMongoDb << __E__;
 
-	int statusCode = system(getTableFromMongoDb.c_str());
-	__COUTVS__(10, statusCode);
+	std::string laodJsonResult = StringMacros::exec(getTableFromMongoDb.c_str());
+	__COUTVS__(10, laodJsonResult.size());
+	__COUT_MULTI__(10, laodJsonResult);
 
-	__COUTS__(10) << StringMacros::stackTrace() << __E__;
 
-	std::string command =
-	    "python ${SPACK_ENV}/mu2e-trig-config/python/generateMenuFromJSON.py";
 	std::string menuFile = " -mf " + outputFileName;
 	std::string output   = " -o " + trigEpilogsDir;
 	std::string evtMode  = " -evtMode all";
 
+	std::string command =
+	    "python generateMenuFromJSON.py";
 	command += menuFile + output + evtMode;
-	statusCode = system(command.c_str());
-	__COUTVS__(10, statusCode);
+	__COUTS__(10) << "generateMenuFromJSON command: " << command << __E__;
+	std::string genMenuResult = StringMacros::exec(command.c_str());
+	__COUTVS__(10, genMenuResult.size());
+	__COUT_MULTI__(10, genMenuResult);
+	if(1 || genMenuResult == "")
+	{
+		command =
+			"python $OTSDAQ_DIR/python/generateMenuFromJSON.py";
+		command += menuFile + output + evtMode;
+		__COUTS__(10) << "generateMenuFromJSON command tk2: " << command << __E__;
+		__COUTVS__(10, genMenuResult.size());
+		__COUT_MULTI__(10, genMenuResult);
+	}
 
-}  //end init()
+	prereqsGenerated_ = true;
+}  //end initPrereqsForARTDAQ()
 
 DEFINE_OTS_TABLE(TriggerConfigTable)

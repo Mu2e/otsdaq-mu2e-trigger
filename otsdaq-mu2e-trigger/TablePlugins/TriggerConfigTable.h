@@ -18,7 +18,11 @@ class TriggerConfigTable : public TableBase
 	virtual ~TriggerConfigTable(void);
 
 	//Methods
-	void        init						(ConfigurationManager* configManager);
+	void        init						(ConfigurationManager* configManager)  override;
+	void		initPrereqsForARTDAQ		(const ConfigurationManager* configManager) override;
+
+	std::mutex			prereqsGeneratedMutex_;
+	bool			 	prereqsGenerated_ = false;
 };
 // clang-format on
 }  // namespace ots
