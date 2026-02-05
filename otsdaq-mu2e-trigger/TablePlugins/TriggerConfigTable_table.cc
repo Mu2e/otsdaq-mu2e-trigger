@@ -150,6 +150,7 @@ void TriggerConfigTable::initPrereqsForARTDAQ(const ConfigurationManager* config
 			"python $OTSDAQ_DIR/python/generateMenuFromJSON.py";
 		command += menuFile + output + evtMode;
 		__COUTS__(10) << "generateMenuFromJSON command tk2: " << command << __E__;
+		genMenuResult = StringMacros::exec(command.c_str());
 		__COUTVS__(10, genMenuResult.size());
 		__COUT_MULTI__(10, genMenuResult);
 	}
