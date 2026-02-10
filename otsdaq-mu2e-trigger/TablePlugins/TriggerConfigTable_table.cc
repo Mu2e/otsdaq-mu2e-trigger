@@ -104,6 +104,16 @@ void TriggerConfigTable::initPrereqsForARTDAQ(const ConfigurationManager* config
 }  //end initPrereqsForARTDAQ()
 
 //========================================================================================================================
+std::string TriggerConfigTable::getPhysicsMenuJsonFileName(const std::string& triggerTableName,
+                                                            const std::string& triggerTableVersion)
+{
+	// For now, always use physicsMenu.json
+	// Can be extended in the future to use:
+	// return triggerTableName + "-v" + triggerTableVersion + ".json";
+	return "physicsMenu.json";
+}  // end getPhysicsMenuJsonFileName()
+
+//========================================================================================================================
 std::string TriggerConfigTable::getStructureAsJSON(const ConfigurationManager* configManager)
 {
 	std::stringstream out;
@@ -113,7 +123,6 @@ std::string TriggerConfigTable::getStructureAsJSON(const ConfigurationManager* c
 
 	std::string triggerDoc;
 	std::string triggerTag;
-	std::string menuFilePath = ARTDAQ_FCL_PATH + std::string("/physicsMenu.json");
 	std::string menuFileContent;
 	std::string recordName;
 	if(!records.empty())
@@ -137,6 +146,9 @@ std::string TriggerConfigTable::getStructureAsJSON(const ConfigurationManager* c
 			triggerTag = "";
 		}
 	}
+
+	// Get the physics menu JSON filename
+	std::string menuFilePath = ARTDAQ_FCL_PATH + getPhysicsMenuJsonFileName(triggerDoc, triggerTag);
 
 	// Download trigger menu from MongoDB (in case we're on a different machine)
 	downloadTriggerMenuFromMongoDB(triggerDoc, triggerTag, menuFilePath);
@@ -200,8 +212,6 @@ std::string TriggerConfigTable::getStructureAsJSON(const ConfigurationManager* c
 	out << "\"content\": "
 	    << menuFileContent;
 	out << "}";
-
-	__COUT__ << "Generated JSON: " << out.str() << __E__;
 
 	return out.str();
 }  // end getStructureAsJSON()
@@ -269,8 +279,7 @@ void TriggerConfigTable::generateTriggerEpilogs(const std::string& triggerTableN
 	std::string trigEpilogsDir = ARTDAQ_FCL_PATH + fcl_dir;
 	mkdir(trigEpilogsDir.c_str(), 0755);
 	
-	std::string outputFileName = ARTDAQ_FCL_PATH + "/physicsMenu.json";
-	//std::string outputFileName = ARTDAQ_FCL_PATH + "/" + triggerTableName + "-v" + triggerTableVersion + ".json";
+	std::string outputFileName = ARTDAQ_FCL_PATH + getPhysicsMenuJsonFileName(triggerTableName, triggerTableVersion);
 
 	// Download the trigger menu from MongoDB
 	downloadTriggerMenuFromMongoDB(triggerTableName, triggerTableVersion, outputFileName);

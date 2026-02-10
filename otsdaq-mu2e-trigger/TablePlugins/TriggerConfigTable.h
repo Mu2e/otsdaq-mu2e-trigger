@@ -25,6 +25,8 @@ class TriggerConfigTable : public TableBase
 											 const std::string& triggerTableVersion);
 
 private:
+	std::string getPhysicsMenuJsonFileName	(const std::string& triggerTableName,
+											 const std::string& triggerTableVersion);
 	void		downloadTriggerMenuFromMongoDB	(const std::string& triggerTableName,
 											 const std::string& triggerTableVersion,
 											 const std::string& outputFileName);
