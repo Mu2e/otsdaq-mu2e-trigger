@@ -8,6 +8,7 @@
 #include <fstream>     // std::fstream
 #include <iostream>
 #include <regex>
+#include <sstream>
 
 using namespace ots;
 
@@ -31,7 +32,9 @@ TriggerConfigTable::TriggerConfigTable(void) : TableBase("TriggerConfigTable")
 	                 "TriggerConfigTable plugin..."
 	              << __E__;
 	//  exit(0);
-	__COUTS__(10) << StringMacros::stackTrace() << __E__;
+    // SC: 2/9/2026 commented out the line below
+    // the line below is really confusing when debugging because it looks like an error
+	//__COUTS__(10) << StringMacros::stackTrace() << __E__; 
 }  //end constructor
 
 //========================================================================================================================
@@ -76,11 +79,6 @@ void TriggerConfigTable::initPrereqsForARTDAQ(const ConfigurationManager* config
 	//make directory just in case
 	mkdir((ARTDAQ_FCL_PATH).c_str(), 0755);
 
-	std::string trigEpilogsDir;
-	std::string fcl_dir = "TriggerEpilogs";
-	trigEpilogsDir      = ARTDAQ_FCL_PATH + fcl_dir;
-	mkdir(trigEpilogsDir.c_str(), 0755);
-
 	auto childrenMap = configManager->__SELF_NODE__.getChildren();
 	__COUTS__(10) << "children map size" << childrenMap.size() << __E__;
 
@@ -99,7 +97,121 @@ void TriggerConfigTable::initPrereqsForARTDAQ(const ConfigurationManager* config
 	    topLevelPair.second.getNode("TriggerDocName").getValue();  //" testTriggerDoc ";
 	std::string triggerTableVersion =
 	    topLevelPair.second.getNode("TriggerConfigTag").getValue();  //" 6 ";
-	std::string outputFileName = ARTDAQ_FCL_PATH + "/physMenu.json";
+
+	generateTriggerEpilogs(triggerTableName, triggerTableVersion);
+
+	prereqsGenerated_ = true;
+}  //end initPrereqsForARTDAQ()
+
+//========================================================================================================================
+std::string TriggerConfigTable::getStructureAsJSON(const ConfigurationManager* configManager)
+{
+	std::stringstream out;
+
+	std::vector<std::pair<std::string, ConfigurationTree>> records =
+	    configManager->getNode(getTableName()).getChildren();
+
+	std::string triggerDoc;
+	std::string triggerTag;
+	std::string menuFilePath = ARTDAQ_FCL_PATH + std::string("/physicsMenu.json");
+	std::string menuFileContent;
+	std::string recordName;
+	if(!records.empty())
+	{
+		auto& recordPair = records.at(0);
+		recordName = recordPair.first;
+		try
+		{
+			triggerDoc = recordPair.second.getNode("TriggerDocName").getValue();
+		}
+		catch(...)
+		{
+			triggerDoc = "";
+		}
+		try
+		{
+			triggerTag = recordPair.second.getNode("TriggerConfigTag").getValue();
+		}
+		catch(...)
+		{
+			triggerTag = "";
+		}
+	}
+
+	// Download trigger menu from MongoDB (in case we're on a different machine)
+	downloadTriggerMenuFromMongoDB(triggerDoc, triggerTag, menuFilePath);
+
+	// Read physics menu JSON content
+	{
+		std::ifstream menuFile(menuFilePath, std::ios::in);
+		if(!menuFile.good())
+		{
+			__SS__ << "Could not open menu file: " << menuFilePath 
+			       << " - Make sure initPrereqsForARTDAQ() was called successfully!" << __E__;
+			__SS_THROW__;
+		}
+		
+		std::stringstream menuBuffer;
+		menuBuffer << menuFile.rdbuf();
+		menuFileContent = menuBuffer.str();
+		menuFile.close();
+		
+		__COUT__ << "Read " << menuFileContent.size() << " bytes from menu file" << __E__;
+		
+		// Trim whitespace
+		menuFileContent.erase(0, menuFileContent.find_first_not_of(" \t\n\r"));
+		menuFileContent.erase(menuFileContent.find_last_not_of(" \t\n\r") + 1);
+		
+		if(menuFileContent.empty())
+		{
+			__SS__ << "Menu file is empty: " << menuFilePath << __E__;
+			__SS_THROW__;
+		}
+		
+		// Validate it starts with { or [ (basic JSON check)
+		if(menuFileContent[0] != '{' && menuFileContent[0] != '[')
+		{
+			__SS__ << "Menu file content doesn't start with valid JSON: " 
+			       << menuFileContent.substr(0, 50) << __E__;
+			__SS_THROW__;
+		}
+		
+		// Check for null bytes or other control characters that could break JSON
+		for(size_t i = 0; i < menuFileContent.size(); ++i)
+		{
+			unsigned char c = menuFileContent[i];
+			if(c == 0)  // null byte
+			{
+				__SS__ << "Found null byte at position " << i << " in menu file!" << __E__;
+				__SS_THROW__;
+			}
+		}
+	}
+
+	out << "{";
+	out << "\"alias\": \""
+	    << StringMacros::escapeJSONStringEntities(recordName) << "\",";
+	out << "\"name\": \""
+	    << StringMacros::escapeJSONStringEntities(triggerDoc) << "\",";
+	out << "\"version\": \""
+	    << StringMacros::escapeJSONStringEntities(triggerTag) << "\",";
+	//out << "\"file\": \""
+	//    << StringMacros::escapeJSONStringEntities(menuFilePath) << "\",";
+	out << "\"content\": "
+	    << menuFileContent;
+	out << "}";
+
+	__COUT__ << "Generated JSON: " << out.str() << __E__;
+
+	return out.str();
+}  // end getStructureAsJSON()
+
+//========================================================================================================================
+void TriggerConfigTable::downloadTriggerMenuFromMongoDB(const std::string& triggerTableName,
+                                                         const std::string& triggerTableVersion,
+                                                         const std::string& outputFileName)
+{
+	__COUT__ << "downloadTriggerMenuFromMongoDB() for " << triggerTableName << " v" << triggerTableVersion << __E__;
 
 	//sanitize values for system call
 	for(size_t c = 0; c < triggerTableName.size(); ++c)
@@ -128,34 +240,74 @@ void TriggerConfigTable::initPrereqsForARTDAQ(const ConfigurationManager* config
 	    triggerTableName + " " + triggerTableVersion + " " + outputFileName;
 	__COUTS__(10) << "otsdaq_load_json command: " << getTableFromMongoDb << __E__;
 
+	// Remove old output file to ensure we detect a fresh one
+	remove(outputFileName.c_str());
+
 	std::string laodJsonResult = StringMacros::exec(getTableFromMongoDb.c_str());
 	__COUTVS__(10, laodJsonResult.size());
 	__COUT_MULTI__(10, laodJsonResult);
 
+	// Verify the output file was created
+	std::ifstream checkOutputFile(outputFileName);
+	if(!checkOutputFile.good())
+	{
+		__SS__ << "otsdaq_load_json_document failed to create output file '" << outputFileName << "'\n"
+		       << "Command: " << getTableFromMongoDb << "\n"
+		       << "Output:\n" << laodJsonResult << __E__;
+		__SS_THROW__;
+	}
+}  // end downloadTriggerMenuFromMongoDB()
+
+//========================================================================================================================
+void TriggerConfigTable::generateTriggerEpilogs(const std::string& triggerTableName,
+                                                 const std::string& triggerTableVersion)
+{
+	__COUT__ << "generateTriggerEpilogs() for " << triggerTableName << " v" << triggerTableVersion << __E__;
+	
+	// Create trigger epilogs directory
+	std::string fcl_dir = "TriggerEpilogs";
+	std::string trigEpilogsDir = ARTDAQ_FCL_PATH + fcl_dir;
+	mkdir(trigEpilogsDir.c_str(), 0755);
+	
+	std::string outputFileName = ARTDAQ_FCL_PATH + "/physicsMenu.json";
+	//std::string outputFileName = ARTDAQ_FCL_PATH + "/" + triggerTableName + "-v" + triggerTableVersion + ".json";
+
+	// Download the trigger menu from MongoDB
+	downloadTriggerMenuFromMongoDB(triggerTableName, triggerTableVersion, outputFileName);
 
 	std::string menuFile = " -mf " + outputFileName;
 	std::string output   = " -o " + trigEpilogsDir;
 	std::string evtMode  = " -evtMode all";
 
-	std::string command =
-	    "python generateMenuFromJSON.py";
-	command += menuFile + output + evtMode;
+	std::string command = "generateMenuFromJSON.py" + menuFile + output + evtMode;
 	__COUTS__(10) << "generateMenuFromJSON command: " << command << __E__;
-	std::string genMenuResult = StringMacros::exec(command.c_str());
-	__COUTVS__(10, genMenuResult.size());
-	__COUT_MULTI__(10, genMenuResult);
-	if(1 || genMenuResult == "")
+	const std::string exitMarker = "__OTS_CMD_EXIT__=";
+	std::string cmdWithStatus = command + " ; echo " + exitMarker + "$?";
+	std::string genMenuResult = StringMacros::exec(cmdWithStatus.c_str());
+
+	int exitCode = -1;
+	auto markerPos = genMenuResult.rfind(exitMarker);
+	if(markerPos != std::string::npos)
 	{
-		command =
-			"python $OTSDAQ_DIR/python/generateMenuFromJSON.py";
-		command += menuFile + output + evtMode;
-		__COUTS__(10) << "generateMenuFromJSON command tk2: " << command << __E__;
-		genMenuResult = StringMacros::exec(command.c_str());
-		__COUTVS__(10, genMenuResult.size());
-		__COUT_MULTI__(10, genMenuResult);
+		std::string codeStr = genMenuResult.substr(markerPos + exitMarker.size());
+		codeStr.erase(0, codeStr.find_first_not_of(" \t\r\n"));
+		codeStr.erase(codeStr.find_last_not_of(" \t\r\n") + 1);
+		exitCode = std::atoi(codeStr.c_str());
+		genMenuResult.erase(markerPos);
+		// trim trailing whitespace after removing marker
+		genMenuResult.erase(genMenuResult.find_last_not_of(" \t\r\n") + 1);
 	}
 
-	prereqsGenerated_ = true;
-}  //end initPrereqsForARTDAQ()
+	__COUTVS__(10, genMenuResult.size());
+	__COUT_MULTI__(10, genMenuResult);
+
+	if(exitCode != 0)
+	{
+		__SS__ << "generateMenuFromJSON failed (exit code " << exitCode << ")\n"
+		       << "Command: " << command << "\n"
+		       << "Output:\n" << genMenuResult << __E__;
+		__SS_THROW__;
+	}
+}  //end generateTriggerEpilogs()
 
 DEFINE_OTS_TABLE(TriggerConfigTable)

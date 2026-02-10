@@ -20,6 +20,14 @@ class TriggerConfigTable : public TableBase
 	//Methods
 	void        init						(ConfigurationManager* configManager)  override;
 	void		initPrereqsForARTDAQ		(const ConfigurationManager* configManager) override;
+	std::string getStructureAsJSON			(const ConfigurationManager* configManager) override;
+	void		generateTriggerEpilogs		(const std::string& triggerTableName,
+											 const std::string& triggerTableVersion);
+
+private:
+	void		downloadTriggerMenuFromMongoDB	(const std::string& triggerTableName,
+											 const std::string& triggerTableVersion,
+											 const std::string& outputFileName);
 
 	std::mutex			prereqsGeneratedMutex_;
 	bool			 	prereqsGenerated_ = false;
