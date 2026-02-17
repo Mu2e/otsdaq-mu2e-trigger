@@ -272,9 +272,9 @@ void TriggerConfigTable::downloadTriggerMenuFromMongoDB(
 	// Remove old output file to ensure we detect a fresh one
 	remove(outputFileName.c_str());
 
-	std::string laodJsonResult = StringMacros::exec(getTableFromMongoDb.c_str());
-	__COUTVS__(10, laodJsonResult.size());
-	__COUT_MULTI__(10, laodJsonResult);
+	std::string loadJsonResult = StringMacros::exec(getTableFromMongoDb.c_str());
+	__COUTVS__(10, loadJsonResult.size());
+	__COUT_MULTI__(10, loadJsonResult);
 
 	// Verify the output file was created
 	std::ifstream checkOutputFile(outputFileName);
@@ -284,7 +284,7 @@ void TriggerConfigTable::downloadTriggerMenuFromMongoDB(
 		       << outputFileName << "'\n"
 		       << "Command: " << getTableFromMongoDb << "\n"
 		       << "Output:\n"
-		       << laodJsonResult << __E__;
+		       << loadJsonResult << __E__;
 		__SS_THROW__;
 	}
 }  // end downloadTriggerMenuFromMongoDB()
