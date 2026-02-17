@@ -12,7 +12,7 @@
 
 using namespace ots;
 
-#define ARTDAQ_FCL_PATH std::string(getenv("OTS_SCRATCH")) + "/TriggerConfigurations/"
+#define ARTDAQ_FCL_PATH __ENV__("OTS_SCRATCH") + "/TriggerConfigurations/"
 #define ARTDAQ_FILE_PREAMBLE "boardReader"
 
 //helpers
