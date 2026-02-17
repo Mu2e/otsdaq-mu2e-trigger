@@ -3,6 +3,7 @@
 
 #include <fstream>  // std::fstream
 #include <iostream>
+#include <mutex>
 #include <string>
 #include "otsdaq/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq/TableCore/TableBase.h"
