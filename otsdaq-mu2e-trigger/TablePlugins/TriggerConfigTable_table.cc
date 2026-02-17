@@ -249,6 +249,21 @@ void TriggerConfigTable::downloadTriggerMenuFromMongoDB(
 			__SS_THROW__;
 		}
 
+	// Sanitize outputFileName for system call
+	// Allow only alpha-numeric characters, dashes, underscores, dots, and slashes
+	for(size_t c = 0; c < outputFileName.size(); ++c)
+		if(!((outputFileName[c] >= 'a' && outputFileName[c] <= 'z') ||
+		     (outputFileName[c] >= 'A' && outputFileName[c] <= 'Z') ||
+		     (outputFileName[c] >= '0' && outputFileName[c] <= '9') ||
+		     outputFileName[c] == '_' || outputFileName[c] == '-' ||
+		     outputFileName[c] == '.' || outputFileName[c] == '/'))
+		{
+			__SS__ << "Illegal character found in outputFileName '" << outputFileName
+			       << "' ... only alpha-numeric characters, dashes, underscores, dots, "
+			          "and slashes allowed."
+			       << __E__;
+			__SS_THROW__;
+		}
 	std::string getTableFromMongoDb = "otsdaq_load_json_document ";
 	getTableFromMongoDb +=
 	    triggerTableName + " " + triggerTableVersion + " " + outputFileName;
