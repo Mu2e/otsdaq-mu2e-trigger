@@ -32,9 +32,9 @@ TriggerConfigTable::TriggerConfigTable(void) : TableBase("TriggerConfigTable")
 	                 "TriggerConfigTable plugin..."
 	              << __E__;
 	//  exit(0);
-    // SC: 2/9/2026 commented out the line below
-    // the line below is really confusing when debugging because it looks like an error
-	//__COUTS__(10) << StringMacros::stackTrace() << __E__; 
+	// SC: 2/9/2026 commented out the line below
+	// the line below is really confusing when debugging because it looks like an error
+	//__COUTS__(10) << StringMacros::stackTrace() << __E__;
 }  //end constructor
 
 //========================================================================================================================
@@ -51,31 +51,29 @@ void TriggerConfigTable::init(ConfigurationManager* configManager)
 	__COUTV__(isFirstAppInContext_);
 	if(!isFirstAppInContext_)
 		return;
-} //end init()
+}  //end init()
 
 //========================================================================================================================
 void TriggerConfigTable::initPrereqsForARTDAQ(const ConfigurationManager* configManager)
-{	
+{
 	__COUTS__(50) << "initPrereqsForARTDAQ()" << __E__;
 	__COUTS__(51) << StringMacros::stackTrace() << __E__;
-	
+
 	bool needToGenerate = false;
 	//lock for scope to check if need to generate in this thread
 	std::lock_guard<std::mutex> lock(prereqsGeneratedMutex_);
 	if(!prereqsGenerated_)
 		needToGenerate = true;
-		
-	
-	if(!needToGenerate) //then wait for generation
+
+	if(!needToGenerate)  //then wait for generation
 	{
 		__COUTS__(10) << "initPrereqsForARTDAQ() already generated!" << __E__;
-		return; //done!
+		return;  //done!
 	}
 
 	__COUTS__(10) << "initPrereqsForARTDAQ() generating!" << __E__;
 	__COUTS__(11) << StringMacros::stackTrace() << __E__;
 
-	
 	//make directory just in case
 	mkdir((ARTDAQ_FCL_PATH).c_str(), 0755);
 
@@ -84,8 +82,11 @@ void TriggerConfigTable::initPrereqsForARTDAQ(const ConfigurationManager* config
 
 	if(childrenMap.empty())
 	{
-		__SS__ << "There is no record in the table '" << configManager->__SELF_NODE__.getTableName() 
-			<< "' - the first record is required to define the Trigger Menu document and tag!" << __E__;
+		__SS__ << "There is no record in the table '"
+		       << configManager->__SELF_NODE__.getTableName()
+		       << "' - the first record is required to define the Trigger Menu document "
+		          "and tag!"
+		       << __E__;
 		__SS_THROW__;
 	}
 
@@ -104,8 +105,8 @@ void TriggerConfigTable::initPrereqsForARTDAQ(const ConfigurationManager* config
 }  //end initPrereqsForARTDAQ()
 
 //========================================================================================================================
-std::string TriggerConfigTable::getPhysicsMenuJsonFileName(const std::string& triggerTableName,
-                                                            const std::string& triggerTableVersion)
+std::string TriggerConfigTable::getPhysicsMenuJsonFileName(
+    const std::string& triggerTableName, const std::string& triggerTableVersion)
 {
 	// For now, always use physicsMenu.json
 	// Can be extended in the future to use:
@@ -114,7 +115,8 @@ std::string TriggerConfigTable::getPhysicsMenuJsonFileName(const std::string& tr
 }  // end getPhysicsMenuJsonFileName()
 
 //========================================================================================================================
-std::string TriggerConfigTable::getStructureAsJSON(const ConfigurationManager* configManager)
+std::string TriggerConfigTable::getStructureAsJSON(
+    const ConfigurationManager* configManager)
 {
 	std::stringstream out;
 
@@ -128,7 +130,7 @@ std::string TriggerConfigTable::getStructureAsJSON(const ConfigurationManager* c
 	if(!records.empty())
 	{
 		auto& recordPair = records.at(0);
-		recordName = recordPair.first;
+		recordName       = recordPair.first;
 		try
 		{
 			triggerDoc = recordPair.second.getNode("TriggerDocName").getValue();
@@ -148,7 +150,8 @@ std::string TriggerConfigTable::getStructureAsJSON(const ConfigurationManager* c
 	}
 
 	// Get the physics menu JSON filename
-	std::string menuFilePath = ARTDAQ_FCL_PATH + getPhysicsMenuJsonFileName(triggerDoc, triggerTag);
+	std::string menuFilePath =
+	    ARTDAQ_FCL_PATH + getPhysicsMenuJsonFileName(triggerDoc, triggerTag);
 
 	// Download trigger menu from MongoDB (in case we're on a different machine)
 	downloadTriggerMenuFromMongoDB(triggerDoc, triggerTag, menuFilePath);
@@ -158,70 +161,71 @@ std::string TriggerConfigTable::getStructureAsJSON(const ConfigurationManager* c
 		std::ifstream menuFile(menuFilePath, std::ios::in);
 		if(!menuFile.good())
 		{
-			__SS__ << "Could not open menu file: " << menuFilePath 
-			       << " - Make sure initPrereqsForARTDAQ() was called successfully!" << __E__;
+			__SS__ << "Could not open menu file: " << menuFilePath
+			       << " - Make sure initPrereqsForARTDAQ() was called successfully!"
+			       << __E__;
 			__SS_THROW__;
 		}
-		
+
 		std::stringstream menuBuffer;
 		menuBuffer << menuFile.rdbuf();
 		menuFileContent = menuBuffer.str();
 		menuFile.close();
-		
+
 		__COUT__ << "Read " << menuFileContent.size() << " bytes from menu file" << __E__;
-		
+
 		// Trim whitespace
 		menuFileContent.erase(0, menuFileContent.find_first_not_of(" \t\n\r"));
 		menuFileContent.erase(menuFileContent.find_last_not_of(" \t\n\r") + 1);
-		
+
 		if(menuFileContent.empty())
 		{
 			__SS__ << "Menu file is empty: " << menuFilePath << __E__;
 			__SS_THROW__;
 		}
-		
+
 		// Validate it starts with { or [ (basic JSON check)
 		if(menuFileContent[0] != '{' && menuFileContent[0] != '[')
 		{
-			__SS__ << "Menu file content doesn't start with valid JSON: " 
+			__SS__ << "Menu file content doesn't start with valid JSON: "
 			       << menuFileContent.substr(0, 50) << __E__;
 			__SS_THROW__;
 		}
-		
+
 		// Check for null bytes or other control characters that could break JSON
 		for(size_t i = 0; i < menuFileContent.size(); ++i)
 		{
 			unsigned char c = menuFileContent[i];
 			if(c == 0)  // null byte
 			{
-				__SS__ << "Found null byte at position " << i << " in menu file!" << __E__;
+				__SS__ << "Found null byte at position " << i << " in menu file!"
+				       << __E__;
 				__SS_THROW__;
 			}
 		}
 	}
 
 	out << "{";
-	out << "\"alias\": \""
-	    << StringMacros::escapeJSONStringEntities(recordName) << "\",";
-	out << "\"name\": \""
-	    << StringMacros::escapeJSONStringEntities(triggerDoc) << "\",";
-	out << "\"version\": \""
-	    << StringMacros::escapeJSONStringEntities(triggerTag) << "\",";
+	out << "\"alias\": \"" << StringMacros::escapeJSONStringEntities(recordName) << "\",";
+	out << "\"name\": \"" << StringMacros::escapeJSONStringEntities(triggerDoc) << "\",";
+	out << "\"version\": \"" << StringMacros::escapeJSONStringEntities(triggerTag)
+	    << "\",";
 	//out << "\"file\": \""
 	//    << StringMacros::escapeJSONStringEntities(menuFilePath) << "\",";
-	out << "\"content\": "
-	    << menuFileContent;
+	out << "\"content\": " << menuFileContent;
 	out << "}";
 
 	return out.str();
 }  // end getStructureAsJSON()
 
 //========================================================================================================================
-void TriggerConfigTable::downloadTriggerMenuFromMongoDB(const std::string& triggerTableName,
-                                                         const std::string& triggerTableVersion,
-                                                         const std::string& outputFileName)
+void TriggerConfigTable::downloadTriggerMenuFromMongoDB(
+    const std::string& triggerTableName,
+    const std::string& triggerTableVersion,
+    const std::string& outputFileName)
 {
-	__COUT__ << "downloadTriggerMenuFromMongoDB() for " << triggerTableName << " v" << triggerTableVersion << __E__;
+	__COUT__ << "downloadTriggerMenuFromMongoDB() for " << triggerTableName << " v"
+	         << triggerTableVersion << __E__;
 
 	//sanitize values for system call
 	for(size_t c = 0; c < triggerTableName.size(); ++c)
@@ -261,25 +265,30 @@ void TriggerConfigTable::downloadTriggerMenuFromMongoDB(const std::string& trigg
 	std::ifstream checkOutputFile(outputFileName);
 	if(!checkOutputFile.good())
 	{
-		__SS__ << "otsdaq_load_json_document failed to create output file '" << outputFileName << "'\n"
+		__SS__ << "otsdaq_load_json_document failed to create output file '"
+		       << outputFileName << "'\n"
 		       << "Command: " << getTableFromMongoDb << "\n"
-		       << "Output:\n" << laodJsonResult << __E__;
+		       << "Output:\n"
+		       << laodJsonResult << __E__;
 		__SS_THROW__;
 	}
 }  // end downloadTriggerMenuFromMongoDB()
 
 //========================================================================================================================
 void TriggerConfigTable::generateTriggerEpilogs(const std::string& triggerTableName,
-                                                 const std::string& triggerTableVersion)
+                                                const std::string& triggerTableVersion)
 {
-	__COUT__ << "generateTriggerEpilogs() for " << triggerTableName << " v" << triggerTableVersion << __E__;
-	
+	__COUT__ << "generateTriggerEpilogs() for " << triggerTableName << " v"
+	         << triggerTableVersion << __E__;
+
 	// Create trigger epilogs directory
-	std::string fcl_dir = "TriggerEpilogs";
+	std::string fcl_dir        = "TriggerEpilogs";
 	std::string trigEpilogsDir = ARTDAQ_FCL_PATH + fcl_dir;
 	mkdir(trigEpilogsDir.c_str(), 0755);
-	
-	std::string outputFileName = ARTDAQ_FCL_PATH + getPhysicsMenuJsonFileName(triggerTableName, triggerTableVersion);
+
+	std::string outputFileName =
+	    ARTDAQ_FCL_PATH +
+	    getPhysicsMenuJsonFileName(triggerTableName, triggerTableVersion);
 
 	// Download the trigger menu from MongoDB
 	downloadTriggerMenuFromMongoDB(triggerTableName, triggerTableVersion, outputFileName);
@@ -290,11 +299,11 @@ void TriggerConfigTable::generateTriggerEpilogs(const std::string& triggerTableN
 
 	std::string command = "generateMenuFromJSON.py" + menuFile + output + evtMode;
 	__COUTS__(10) << "generateMenuFromJSON command: " << command << __E__;
-	const std::string exitMarker = "__OTS_CMD_EXIT__=";
-	std::string cmdWithStatus = command + " ; echo " + exitMarker + "$?";
-	std::string genMenuResult = StringMacros::exec(cmdWithStatus.c_str());
+	const std::string exitMarker    = "__OTS_CMD_EXIT__=";
+	std::string       cmdWithStatus = command + " ; echo " + exitMarker + "$?";
+	std::string       genMenuResult = StringMacros::exec(cmdWithStatus.c_str());
 
-	int exitCode = -1;
+	int  exitCode  = -1;
 	auto markerPos = genMenuResult.rfind(exitMarker);
 	if(markerPos != std::string::npos)
 	{
@@ -314,7 +323,8 @@ void TriggerConfigTable::generateTriggerEpilogs(const std::string& triggerTableN
 	{
 		__SS__ << "generateMenuFromJSON failed (exit code " << exitCode << ")\n"
 		       << "Command: " << command << "\n"
-		       << "Output:\n" << genMenuResult << __E__;
+		       << "Output:\n"
+		       << genMenuResult << __E__;
 		__SS_THROW__;
 	}
 }  //end generateTriggerEpilogs()
