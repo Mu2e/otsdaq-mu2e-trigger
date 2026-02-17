@@ -65,7 +65,7 @@ void TriggerConfigTable::initPrereqsForARTDAQ(const ConfigurationManager* config
 	if(!prereqsGenerated_)
 		needToGenerate = true;
 
-	if(!needToGenerate)  //then wait for generation
+	if(!needToGenerate)  //already generated in another call; nothing to do
 	{
 		__COUTS__(10) << "initPrereqsForARTDAQ() already generated!" << __E__;
 		return;  //done!
