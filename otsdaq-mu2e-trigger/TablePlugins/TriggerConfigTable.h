@@ -21,10 +21,10 @@ class TriggerConfigTable : public TableBase
 	void        init						(ConfigurationManager* configManager)  override;
 	void		initPrereqsForARTDAQ		(const ConfigurationManager* configManager) override;
 	std::string getStructureAsJSON			(const ConfigurationManager* configManager) override;
-	void		generateTriggerEpilogs		(const std::string& triggerTableName,
-											 const std::string& triggerTableVersion);
 
 private:
+	void		generateTriggerEpilogs		(const std::string& triggerTableName,
+											 const std::string& triggerTableVersion);
 	std::string getPhysicsMenuJsonFileName	(const std::string& triggerTableName,
 											 const std::string& triggerTableVersion);
 	void		downloadTriggerMenuFromMongoDB	(const std::string& triggerTableName,
