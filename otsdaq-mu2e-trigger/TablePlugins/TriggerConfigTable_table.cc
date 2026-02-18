@@ -12,8 +12,9 @@
 
 using namespace ots;
 
-#define ARTDAQ_FCL_PATH __ENV__("OTS_SCRATCH") + "/TriggerConfigurations/"
-#define ARTDAQ_FILE_PREAMBLE "boardReader"
+// clang-format off
+#define ARTDAQ_FCL_PATH 		__ENV__("OTS_SCRATCH") + std::string("/TriggerConfigurations/")
+#define ARTDAQ_FILE_PREAMBLE 	"boardReader"
 
 //helpers
 #define OUT out << tabStr << commentStr
@@ -21,6 +22,7 @@ using namespace ots;
 #define POPTAB tabStr.resize(tabStr.size() - 1)
 #define PUSHCOMMENT commentStr += "# "
 #define POPCOMMENT commentStr.resize(commentStr.size() - 2)
+// clang-format on
 
 //========================================================================================================================
 TriggerConfigTable::TriggerConfigTable(void) : TableBase("TriggerConfigTable")
