@@ -9,7 +9,7 @@
 
 namespace ots
 {
-
+// clang-format off
 class OfflineDatabaseTable : public TableBase
 {
   public:
@@ -17,8 +17,10 @@ class OfflineDatabaseTable : public TableBase
 	virtual ~OfflineDatabaseTable(void);
 
 	// Methods
-	void init(ConfigurationManager* configManager);
-	void createTriggerFcl(std::ofstream& fclFileOut, ConfigurationManager* configManager);
+	void 				init							(ConfigurationManager* configManager);
+	void 				createTriggerFcl				(std::ostream& fclFileOut, const ConfigurationManager* configManager) const;
+	std::string	     	getFclValueForARTDAQ			(const ConfigurationManager* configManager, const std::string& field = "") const override;
 };
+// clang-format on
 }  // namespace ots
 #endif

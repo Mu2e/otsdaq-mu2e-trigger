@@ -51,54 +51,56 @@ void OfflineDatabaseTable::init(ConfigurationManager* configManager)
 	if(!isFirstAppInContext_)
 		return;
 
-	// make directory just in case
-	mkdir((ARTDAQ_FCL_PATH).c_str(), 0755);
-
-	std::string trigEpilogsDir;
-	std::string fcl_dir = "TriggerEpilogs";
-	trigEpilogsDir      = ARTDAQ_FCL_PATH + fcl_dir;
-	mkdir(trigEpilogsDir.c_str(), 0755);
-	std::string outFilename = trigEpilogsDir + "/" + "OfflineDatabaseInclude.fcl";
-
-	__COUTS__(10) << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
-	__COUTS__(10) << configManager->__SELF_NODE__ << std::endl;
-
-	// Need to generate this:
-	// 		services : {
-	// 		  DbService : {
-	// 		     purpose :  EMPTY
-	// 		     version : v0   # ignored
-	// 		     dbName : "mu2e_conditions_prd"  # ignored
-	// 		     textFile : ["table.txt"]   # provide everything needed
-	// 		     verbose : 1
-	// 		  }
-	// 		}
-
-	// Process childrenMap to extract child pairs and write in required format
-	std::ofstream outFile(outFilename);
-	if(!outFile.is_open())
+	if(0)
 	{
-		__SS__ << "Offline Database output file could not be opened at path: "
-		       << outFilename << __E__;
-		__SS_THROW__;
+		// make directory just in case
+		mkdir((ARTDAQ_FCL_PATH).c_str(), 0755);
+
+		std::string trigEpilogsDir;
+		std::string fcl_dir = "TriggerEpilogs";
+		trigEpilogsDir      = ARTDAQ_FCL_PATH + fcl_dir;
+		mkdir(trigEpilogsDir.c_str(), 0755);
+		std::string outFilename = trigEpilogsDir + "/" + "OfflineDatabaseInclude.fcl";
+
+		__COUTS__(10) << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
+		__COUTS__(10) << configManager->__SELF_NODE__ << std::endl;
+
+		// Need to generate this:
+		// 		services : {
+		// 		  DbService : {
+		// 		     purpose :  EMPTY
+		// 		     version : v0   # ignored
+		// 		     dbName : "mu2e_conditions_prd"  # ignored
+		// 		     textFile : ["table.txt"]   # provide everything needed
+		// 		     verbose : 1
+		// 		  }
+		// 		}
+
+		// Process childrenMap to extract child pairs and write in required format
+		std::ofstream outFile(outFilename);
+		if(!outFile.is_open())
+		{
+			__SS__ << "Offline Database output file could not be opened at path: "
+				<< outFilename << __E__;
+			__SS_THROW__;
+		}
+		outFile << "art.services.DbService : ";
+		createTriggerFcl(outFile, configManager);
+		outFile.close();
 	}
-	createTriggerFcl(outFile, configManager);
-	outFile.close();
 
 }  // end init()
 
 //========================================================================================================================
-void OfflineDatabaseTable::createTriggerFcl(std::ofstream&        outFile,
-                                            ConfigurationManager* configManager)
+void OfflineDatabaseTable::createTriggerFcl(std::ostream&        outFile,
+                                            const ConfigurationManager* configManager) const
 {
 	auto childrenMap = configManager->__SELF_NODE__.getChildren();
 
 	std::string tabStr     = "";
 	std::string commentStr = "";
 
-	// outFile << tabStr << "services : {" << std::endl;
-	// PUSHTAB;
-	outFile << tabStr << "art.services.DbService : {" << std::endl;
+	outFile << tabStr << "{" << std::endl;
 	PUSHTAB;
 	outFile << tabStr << "purpose :  EMPTY" << std::endl;
 	outFile << tabStr << "version : v0   # ignored" << std::endl;
@@ -122,8 +124,30 @@ void OfflineDatabaseTable::createTriggerFcl(std::ofstream&        outFile,
 	outFile << tabStr << "verbose : " << OFFLINE_DBSERVICE_VERBOSE << std::endl;
 	POPTAB;
 	outFile << tabStr << "}" << std::endl;
-	// POPTAB;
-	// outFile << tabStr << "}" << std::endl;
+
 }  //end createTriggerFcl()
+
+//========================================================================================================================
+std::string OfflineDatabaseTable::getFclValueForARTDAQ(const ConfigurationManager* configManager, const std::string& field) const
+{
+	if(field != "DbService")
+	{
+		__SS__ << "Unexpected field requested for getFclValueForARTDAQ()" << __E__;
+		__SS_THROW__;
+	}
+
+	// Need to generate this
+	//		  {
+	// 		     purpose :  EMPTY
+	// 		     version : v0   # ignored
+	// 		     dbName : "mu2e_conditions_prd"  # ignored
+	// 		     textFile : ["table.txt"]   # provide everything needed
+	// 		     verbose : 1
+	// 		  }
+
+	std::stringstream ss;
+	createTriggerFcl(ss, configManager);
+	return ss.str();
+}  //end getFclValueForARTDAQ()
 
 DEFINE_OTS_TABLE(OfflineDatabaseTable)
