@@ -113,7 +113,7 @@ std::string TriggerConfigTable::getPhysicsMenuJsonFileName(
 	// For now, always use physicsMenu.json
 	// Can be extended in the future to use:
 	// return triggerTableName + "-v" + triggerTableVersion + ".json";
-	return "physicsMenu.json";
+	return "physMenu.json";
 }  // end getPhysicsMenuJsonFileName()
 
 //========================================================================================================================
