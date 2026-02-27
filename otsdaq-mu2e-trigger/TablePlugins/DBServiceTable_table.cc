@@ -169,24 +169,24 @@ std::string DBServiceTable::getStructureAsJSON(const ConfigurationManager* confi
 	std::vector<std::pair<std::string, ConfigurationTree>> records =
 	    configManager->getNode(getTableName()).getChildren();
 
-	std::string name;
-	std::string cid;
-
 	out << "[";
 
 	bool firstRecord = true;
 
-	if(!records.empty())
+	for(auto& recordPair : records)
 	{
-		auto& recordPair = records.at(0);
-		// recordName       = recordPair.first;
+		std::string name;
+		std::string cid;
+		const auto& recordName = recordPair.first;
 		try
 		{
 			name = recordPair.second.getNode("Name").getValue();
 		}
 		catch(...)
 		{
-			name = "";
+			__SS__ << "Missing required field 'Name' in DBServiceTable record '"
+			       << recordName << "'." << __E__;
+			__SS_THROW__;
 		}
 		try
 		{
@@ -194,7 +194,9 @@ std::string DBServiceTable::getStructureAsJSON(const ConfigurationManager* confi
 		}
 		catch(...)
 		{
-			cid = "";
+			__SS__ << "Missing required field 'CID' in DBServiceTable record '"
+			       << recordName << "'." << __E__;
+			__SS_THROW__;
 		}
 		if(!firstRecord)
 		{
