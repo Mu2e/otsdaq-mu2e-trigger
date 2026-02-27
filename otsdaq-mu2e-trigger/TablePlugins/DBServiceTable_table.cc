@@ -1,4 +1,4 @@
-#include "otsdaq-mu2e-trigger/TablePlugins/OfflineDatabaseTable.h"
+#include "otsdaq-mu2e-trigger/TablePlugins/DBServiceTable.h"
 #include "otsdaq/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq/Macros/TablePluginMacros.h"
 
@@ -13,11 +13,11 @@ using namespace ots;
 //Note: this could be used to inspect the path of the trigger offline db (declaration example from otsdaq-mu2e-calorimeter/otsdaq-mu2e-calorimeter/TablePlugins/SubsystemCalorimeterParametersTable_table.cc)
 // const std::string SubsystemCalorimeterParametersTable::PATH_TO_TRIGGER_OFFLINE_DB = getenv("PATH_TO_TRIGGER_OFFLINE_DB") ? getenv("PATH_TO_TRIGGER_OFFLINE_DB") : "";
 
-#define ARTDAQ_FCL_PATH std::string(getenv("OTS_SCRATCH")) + "/TriggerConfigurations/"
+#define ARTDAQ_FCL_PATH std::string(getenv("OTS_SCRATCH")) + "/TriggerConfigurations/" // no longer used
 
-#define OFFLINE_DBSERVICE_VERBOSE \
+#define DBSERVICE_VERBOSE \
 	std::string(                  \
-	    getenv("OFFLINE_DBSERVICE_VERBOSE") ? getenv("OFFLINE_DBSERVICE_VERBOSE") : "0")
+		getenv("DBSERVICE_VERBOSE") ? getenv("DBSERVICE_VERBOSE") : "0")
 
 // helpers
 #define OUT out << tabStr << commentStr
@@ -27,23 +27,23 @@ using namespace ots;
 #define POPCOMMENT commentStr.resize(commentStr.size() - 2)
 
 //========================================================================================================================
-OfflineDatabaseTable::OfflineDatabaseTable(void) : TableBase("OfflineDatabaseTable")
+DBServiceTable::DBServiceTable(void) : TableBase("DBServiceTable")
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  //
 	//////////////////////////////////////////////////////////////////////
-	__COUTS__(10) << "[OfflineDatabaseTable::OfflineDatabaseTable] Initializing the "
-	                 "OfflineDatabaseTable plugin..."
-	              << __E__;
+	__COUTS__(10) << "[DBService::DBService] Initializing the "
+					 "DBServiceTable plugin..."
+				  << __E__;
 	//  exit(0);
 	__COUTS__(10) << StringMacros::stackTrace() << __E__;
 }  // end constructor
 
 //========================================================================================================================
-OfflineDatabaseTable::~OfflineDatabaseTable(void) {}
+DBServiceTable::~DBServiceTable(void) {}
 
 //========================================================================================================================
-void OfflineDatabaseTable::init(ConfigurationManager* configManager)
+void DBServiceTable::init(ConfigurationManager* configManager)
 {
 	isFirstAppInContext_ = configManager->isOwnerFirstAppInContext();
 
@@ -60,7 +60,7 @@ void OfflineDatabaseTable::init(ConfigurationManager* configManager)
 		std::string fcl_dir = "TriggerEpilogs";
 		trigEpilogsDir      = ARTDAQ_FCL_PATH + fcl_dir;
 		mkdir(trigEpilogsDir.c_str(), 0755);
-		std::string outFilename = trigEpilogsDir + "/" + "OfflineDatabaseInclude.fcl";
+		std::string outFilename = trigEpilogsDir + "/" + "DBServiceInclude.fcl";
 
 		__COUTS__(10) << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
 		__COUTS__(10) << configManager->__SELF_NODE__ << std::endl;
@@ -80,7 +80,7 @@ void OfflineDatabaseTable::init(ConfigurationManager* configManager)
 		std::ofstream outFile(outFilename);
 		if(!outFile.is_open())
 		{
-			__SS__ << "Offline Database output file could not be opened at path: "
+			__SS__ << "Offline DBService output file could not be opened at path: "
 				<< outFilename << __E__;
 			__SS_THROW__;
 		}
@@ -92,8 +92,8 @@ void OfflineDatabaseTable::init(ConfigurationManager* configManager)
 }  // end init()
 
 //========================================================================================================================
-void OfflineDatabaseTable::createTriggerFcl(std::ostream&        outFile,
-                                            const ConfigurationManager* configManager) const
+void DBServiceTable::createTriggerFcl(std::ostream&        outFile,
+									  const ConfigurationManager* configManager) const
 {
 	auto childrenMap = configManager->__SELF_NODE__.getChildren();
 
@@ -115,20 +115,29 @@ void OfflineDatabaseTable::createTriggerFcl(std::ostream&        outFile,
 		{
 			outFile << ", ";
 		}
-		outFile << "\"" << pair.first << "_"
-		        << pair.second.getNode("CID").getValue<std::string>() << ".txt\"";
+
+		std::string cid = pair.second.getNode("CID").getValue<std::string>();
+		// Empty/default/online CID means it uses an online generated table (no _CID suffix).
+		bool includeCid =
+			!cid.empty() &&
+			!std::regex_match(cid, std::regex("(default|online)", std::regex_constants::icase));
+
+		outFile << "\"" << pair.first;
+		if(includeCid)
+			outFile << "_" << cid;
+		outFile << ".txt\"";
 		first = false;
 	}
 	outFile << "]   # provide everything needed" << std::endl;
 
-	outFile << tabStr << "verbose : " << OFFLINE_DBSERVICE_VERBOSE << std::endl;
+	outFile << tabStr << "verbose : " << DBSERVICE_VERBOSE << std::endl;
 	POPTAB;
 	outFile << tabStr << "}" << std::endl;
 
 }  //end createTriggerFcl()
 
 //========================================================================================================================
-std::string OfflineDatabaseTable::getFclValueForARTDAQ(const ConfigurationManager* configManager, const std::string& field) const
+std::string DBServiceTable::getFclValueForARTDAQ(const ConfigurationManager* configManager, const std::string& field) const
 {
 	if(field != "DbService")
 	{
@@ -150,4 +159,56 @@ std::string OfflineDatabaseTable::getFclValueForARTDAQ(const ConfigurationManage
 	return ss.str();
 }  //end getFclValueForARTDAQ()
 
-DEFINE_OTS_TABLE(OfflineDatabaseTable)
+//========================================================================================================================
+std::string DBServiceTable::getStructureAsJSON(
+	const ConfigurationManager* configManager)
+{
+	std::stringstream out;
+
+	std::vector<std::pair<std::string, ConfigurationTree>> records =
+		configManager->getNode(getTableName()).getChildren();
+
+	std::string name;
+	std::string cid;
+
+	out << "[";
+
+	bool firstRecord = true;
+
+	if(!records.empty())
+	{
+		auto& recordPair = records.at(0);
+		// recordName       = recordPair.first;
+		try
+		{
+			name = recordPair.second.getNode("Name").getValue();
+		}
+		catch(...)
+		{
+			name = "";
+		}
+		try
+		{
+			cid = recordPair.second.getNode("CID").getValue();
+		}
+		catch(...)
+		{
+			cid = "";
+		}
+		if(!firstRecord)
+		{
+			out << ", ";
+		}
+		out << "{";
+		out << "\"name\": \"" << StringMacros::escapeJSONStringEntities(name) << "\",";
+		out << "\"cid\": \"" << StringMacros::escapeJSONStringEntities(cid) << "\"";
+		out << "}";
+		firstRecord = false;
+	}
+	out << "]";
+
+	return out.str();
+}  // end getStructureAsJSON()
+
+
+DEFINE_OTS_TABLE(DBServiceTable)

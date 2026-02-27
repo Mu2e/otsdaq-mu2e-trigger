@@ -10,16 +10,17 @@
 namespace ots
 {
 // clang-format off
-class OfflineDatabaseTable : public TableBase
+class DBServiceTable : public TableBase
 {
   public:
-	OfflineDatabaseTable(void);
-	virtual ~OfflineDatabaseTable(void);
+	DBServiceTable(void);
+	virtual ~DBServiceTable(void);
 
 	// Methods
 	void 				init							(ConfigurationManager* configManager);
 	void 				createTriggerFcl				(std::ostream& fclFileOut, const ConfigurationManager* configManager) const;
 	std::string	     	getFclValueForARTDAQ			(const ConfigurationManager* configManager, const std::string& field = "") const override;
+	std::string         getStructureAsJSON		        (const ConfigurationManager* configManager) override;
 };
 // clang-format on
 }  // namespace ots
