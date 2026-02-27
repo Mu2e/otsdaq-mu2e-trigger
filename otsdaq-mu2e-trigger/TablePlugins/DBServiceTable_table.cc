@@ -13,11 +13,11 @@ using namespace ots;
 //Note: this could be used to inspect the path of the trigger offline db (declaration example from otsdaq-mu2e-calorimeter/otsdaq-mu2e-calorimeter/TablePlugins/SubsystemCalorimeterParametersTable_table.cc)
 // const std::string SubsystemCalorimeterParametersTable::PATH_TO_TRIGGER_OFFLINE_DB = getenv("PATH_TO_TRIGGER_OFFLINE_DB") ? getenv("PATH_TO_TRIGGER_OFFLINE_DB") : "";
 
-#define ARTDAQ_FCL_PATH std::string(getenv("OTS_SCRATCH")) + "/TriggerConfigurations/" // no longer used
+#define ARTDAQ_FCL_PATH \
+	std::string(getenv("OTS_SCRATCH")) + "/TriggerConfigurations/"  // no longer used
 
 #define DBSERVICE_VERBOSE \
-	std::string(                  \
-		getenv("DBSERVICE_VERBOSE") ? getenv("DBSERVICE_VERBOSE") : "0")
+	std::string(getenv("DBSERVICE_VERBOSE") ? getenv("DBSERVICE_VERBOSE") : "0")
 
 // helpers
 #define OUT out << tabStr << commentStr
@@ -33,8 +33,8 @@ DBServiceTable::DBServiceTable(void) : TableBase("DBServiceTable")
 	// WARNING: the names used in C++ MUST match the Table INFO  //
 	//////////////////////////////////////////////////////////////////////
 	__COUTS__(10) << "[DBService::DBService] Initializing the "
-					 "DBServiceTable plugin..."
-				  << __E__;
+	                 "DBServiceTable plugin..."
+	              << __E__;
 	//  exit(0);
 	__COUTS__(10) << StringMacros::stackTrace() << __E__;
 }  // end constructor
@@ -81,7 +81,7 @@ void DBServiceTable::init(ConfigurationManager* configManager)
 		if(!outFile.is_open())
 		{
 			__SS__ << "Offline DBService output file could not be opened at path: "
-				<< outFilename << __E__;
+			       << outFilename << __E__;
 			__SS_THROW__;
 		}
 		outFile << "art.services.DbService : ";
@@ -92,8 +92,8 @@ void DBServiceTable::init(ConfigurationManager* configManager)
 }  // end init()
 
 //========================================================================================================================
-void DBServiceTable::createTriggerFcl(std::ostream&        outFile,
-									  const ConfigurationManager* configManager) const
+void DBServiceTable::createTriggerFcl(std::ostream&               outFile,
+                                      const ConfigurationManager* configManager) const
 {
 	auto childrenMap = configManager->__SELF_NODE__.getChildren();
 
@@ -119,8 +119,9 @@ void DBServiceTable::createTriggerFcl(std::ostream&        outFile,
 		std::string cid = pair.second.getNode("CID").getValue<std::string>();
 		// Empty/default/online CID means it uses an online generated table (no _CID suffix).
 		bool includeCid =
-			!cid.empty() &&
-			!std::regex_match(cid, std::regex("(default|online)", std::regex_constants::icase));
+		    !cid.empty() &&
+		    !std::regex_match(
+		        cid, std::regex("(default|online)", std::regex_constants::icase));
 
 		outFile << "\"" << pair.first;
 		if(includeCid)
@@ -137,7 +138,8 @@ void DBServiceTable::createTriggerFcl(std::ostream&        outFile,
 }  //end createTriggerFcl()
 
 //========================================================================================================================
-std::string DBServiceTable::getFclValueForARTDAQ(const ConfigurationManager* configManager, const std::string& field) const
+std::string DBServiceTable::getFclValueForARTDAQ(
+    const ConfigurationManager* configManager, const std::string& field) const
 {
 	if(field != "DbService")
 	{
@@ -160,13 +162,12 @@ std::string DBServiceTable::getFclValueForARTDAQ(const ConfigurationManager* con
 }  //end getFclValueForARTDAQ()
 
 //========================================================================================================================
-std::string DBServiceTable::getStructureAsJSON(
-	const ConfigurationManager* configManager)
+std::string DBServiceTable::getStructureAsJSON(const ConfigurationManager* configManager)
 {
 	std::stringstream out;
 
 	std::vector<std::pair<std::string, ConfigurationTree>> records =
-		configManager->getNode(getTableName()).getChildren();
+	    configManager->getNode(getTableName()).getChildren();
 
 	std::string name;
 	std::string cid;
@@ -209,6 +210,5 @@ std::string DBServiceTable::getStructureAsJSON(
 
 	return out.str();
 }  // end getStructureAsJSON()
-
 
 DEFINE_OTS_TABLE(DBServiceTable)
