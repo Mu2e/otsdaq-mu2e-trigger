@@ -69,16 +69,6 @@ endif()
 # these are minimum required versions, not the actual product versions
 find_package(otsdaq-mu2e 1.02.00 REQUIRED)
 
-# Mu2e Offline Extra setup
-find_package(Offline v11_00_00 REQUIRED)
-include_directories($ENV{BTRK_INC} $ENV{KINKAL_INC})
-link_directories($ENV{BTRK_LIB} $ENV{KINKAL_LIB})
-
- # XDAQ Extra setup
- include_directories($ENV{XDAQ_INC} $ENV{XDAQ_INC}/linux)
-link_directories($ENV{XDAQ_LIB})
-
-
 include(BuildPlugins)
 
 # Code
@@ -94,39 +84,5 @@ add_subdirectory(test)
 if( $ENV{OTS_DOXY} MATCHES "DOIT" )
 	add_subdirectory(doc)
 endif()
-
-# Data
-#FILE(COPY ConfigurationDataExamples DESTINATION Data)
-#INSTALL(DIRECTORY ConfigurationDataExamples DESTINATION ${product}/${version}/Data)
-#FILE(COPY XDAQConfigurations DESTINATION Data)
-#INSTALL(DIRECTORY XDAQConfigurations DESTINATION ${product}/${version}/Data)
-#FILE(COPY ServiceData DESTINATION Data)
-#INSTALL(DIRECTORY ServiceData DESTINATION ${product}/${version}/Data)
-#FILE(COPY Data DESTINATION .)
-#INSTALL(DIRECTORY Data DESTINATION ${product}/${version})
-#FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/ServiceData/LoginData)
-#FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/ServiceData/LoginData/UsersData)
-#FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/ServiceData/LoginData/UsersData/UserPreferencesData)
-#FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/ServiceData/LoginData/UsersData/UserLoginHistoryData)
-#FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/ServiceData/LoginData/HashesData)
-#FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/ServiceData/LoginData/bkup/UsersData)
-#FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/ServiceData/LoginData/bkup/UsersData/UserPreferencesData)
-#FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/ServiceData/LoginData/bkup/UsersData/UserLoginHistoryData)
-#FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/ServiceData/LoginData/bkup/HashesData)
-#FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/ServiceData/LogbookData)
-#FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/ServiceData/LogbookData/logbooks)
-#FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/ServiceData/LogbookData/previews)
-#INSTALL(DIRECTORY DESTINATION ${product}/${version}/Data/ServiceData/LoginData)
-#INSTALL(DIRECTORY DESTINATION ${product}/${version}/Data/ServiceData/LoginData/UsersData)
-#INSTALL(DIRECTORY DESTINATION ${product}/${version}/Data/ServiceData/LoginData/UsersData/UserPreferencesData)
-#INSTALL(DIRECTORY DESTINATION ${product}/${version}/Data/ServiceData/LoginData/UsersData/UserLoginHistoryData)
-#INSTALL(DIRECTORY DESTINATION ${product}/${version}/Data/ServiceData/LoginData/HashesData)
-#INSTALL(DIRECTORY DESTINATION ${product}/${version}/Data/ServiceData/LoginData/bkup/UsersData)
-#INSTALL(DIRECTORY DESTINATION ${product}/${version}/Data/ServiceData/LoginData/bkup/UsersData/UserPreferencesData)
-#INSTALL(DIRECTORY DESTINATION ${product}/${version}/Data/ServiceData/LoginData/bkup/UsersData/UserLoginHistoryData)
-#INSTALL(DIRECTORY DESTINATION ${product}/${version}/Data/ServiceData/LoginData/bkup/HashesData)
-#INSTALL(DIRECTORY DESTINATION ${product}/${version}/Data/ServiceData/LogbookData)
-#INSTALL(DIRECTORY DESTINATION ${product}/${version}/Data/ServiceData/LogbookData/logbooks)
-#INSTALL(DIRECTORY DESTINATION ${product}/${version}/Data/ServiceData/LogbookData/previews)
 
 cet_cmake_config()
