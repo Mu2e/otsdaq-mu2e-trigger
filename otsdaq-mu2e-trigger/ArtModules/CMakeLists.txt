@@ -21,3 +21,11 @@ cet_build_plugin(Mu2ePrescaler art::module
 
 install_headers(SUBDIRS detail)
 install_source()
+
+cet_build_plugin(TriggerPathMetrics art::module
+  LIBRARIES REG
+  fhiclcpp::types
+  artdaq::DAQdata
+  fhiclcpp::fhiclcpp
+  canvas::canvas
+)
