@@ -71,14 +71,16 @@ class mu2e::TriggerPathMetrics : public art::EDAnalyzer
 		fhicl::Atom<std::string> processNameTag{
 		    Name("processNameTag"),
 		    Comment("Only use TriggerResults of processes whose name contains this tag "
-		            "(empty: use all processes)"), "EvB"};
+		            "(empty: use all processes)"),
+		    "EvB"};
 		fhicl::Atom<std::string> metricPrefix{
-		  Name("metricPrefix"), Comment("Prefix of all metric names"), "trigger"};
+		    Name("metricPrefix"), Comment("Prefix of all metric names"), "trigger"};
 		fhicl::Atom<int> metricLevel{
-		  Name("metricLevel"), Comment("artdaq metric level of the metrics"), 3};
+		    Name("metricLevel"), Comment("artdaq metric level of the metrics"), 3};
 		fhicl::Sequence<std::string> ignorePaths{
 		    Name("ignorePaths"),
-		    Comment("Paths containing any of these strings are excluded from AnyTriggerPath"),
+		    Comment(
+		        "Paths containing any of these strings are excluded from AnyTriggerPath"),
 		    std::vector<std::string>{}};
 	};
 
@@ -126,7 +128,8 @@ mu2e::TriggerPathMetrics::PathMenu const& mu2e::TriggerPathMetrics::pathMenu(
 	std::vector<std::string> pathEntries;
 	fhicl::ParameterSet      triggerParameterSet;
 	if(fhicl::ParameterSetRegistry::get(parameterSetId, triggerParameterSet))
-		pathEntries = triggerParameterSet.get<std::vector<std::string>>("trigger_paths", {});
+		pathEntries =
+		    triggerParameterSet.get<std::vector<std::string>>("trigger_paths", {});
 	else
 		TLOG(TLVL_WARNING) << "TriggerResults parameter set " << parameterSetId
 		                   << " not found in the registry, paths are reported by index";
@@ -146,8 +149,8 @@ mu2e::TriggerPathMetrics::PathMenu const& mu2e::TriggerPathMetrics::pathMenu(
 			countsAsTrigger &= pathName.find(ignoreTag) == std::string::npos;
 		menu.countsAsTrigger.push_back(countsAsTrigger);
 	}
-	TLOG(TLVL_INFO) << "Trigger menu " << parameterSetId << " has " << menu.metricNames.size()
-	                << " paths";
+	TLOG(TLVL_INFO) << "Trigger menu " << parameterSetId << " has "
+	                << menu.metricNames.size() << " paths";
 	return menu;
 }
 
@@ -179,7 +182,7 @@ void mu2e::TriggerPathMetrics::analyze(art::Event const& event)
 		foundTriggerResults = true;
 
 		art::TriggerResults const& triggerResults = *triggerResultsHandle;
-		PathMenu const&            menu           = pathMenu(triggerResults.parameterSetID());
+		PathMenu const&            menu = pathMenu(triggerResults.parameterSetID());
 		for(unsigned pathIndex = 0; pathIndex < triggerResults.size(); ++pathIndex)
 		{
 			bool const accepted = triggerResults.accept(pathIndex);
@@ -190,7 +193,8 @@ void mu2e::TriggerPathMetrics::analyze(art::Event const& event)
 			}
 			else  // path not in the menu, report by index
 			{
-				sendEventCount(metricPrefix_ + ".Index" + std::to_string(pathIndex), accepted ? 1 : 0);
+				sendEventCount(metricPrefix_ + ".Index" + std::to_string(pathIndex),
+				               accepted ? 1 : 0);
 				anyTriggerAccepted |= accepted;
 			}
 		}
