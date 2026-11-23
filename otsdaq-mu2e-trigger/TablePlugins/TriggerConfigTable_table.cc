@@ -61,23 +61,8 @@ void TriggerConfigTable::initPrereqsForARTDAQ(const ConfigurationManager* config
 	__COUTS__(50) << "initPrereqsForARTDAQ()" << __E__;
 	__COUTS__(51) << StringMacros::stackTrace() << __E__;
 
-	bool needToGenerate = false;
-	//lock for scope to check if need to generate in this thread
+	//lock for scope so parallel table-init threads generate at most once per Configure
 	std::lock_guard<std::mutex> lock(prereqsGeneratedMutex_);
-	if(!prereqsGenerated_)
-		needToGenerate = true;
-
-	if(!needToGenerate)  //already generated in another call; nothing to do
-	{
-		__COUTS__(10) << "initPrereqsForARTDAQ() already generated!" << __E__;
-		return;  //done!
-	}
-
-	__COUTS__(10) << "initPrereqsForARTDAQ() generating!" << __E__;
-	__COUTS__(11) << StringMacros::stackTrace() << __E__;
-
-	//make directory just in case
-	mkdir((ARTDAQ_FCL_PATH).c_str(), 0755);
 
 	auto childrenMap = configManager->__SELF_NODE__.getChildren();
 	__COUTS__(10) << "children map size" << childrenMap.size() << __E__;
@@ -101,9 +86,31 @@ void TriggerConfigTable::initPrereqsForARTDAQ(const ConfigurationManager* config
 	std::string triggerTableVersion =
 	    topLevelPair.second.getNode("TriggerConfigTag").getValue();  //" 6 ";
 
+	// The table plugin object persists across Halt/Configure cycles, so a plain
+	// once-only flag would freeze the menu to whatever tag was active at the first
+	// Configure of this process. Instead regenerate whenever the resolved document
+	// name or tag differs from the last generation.
+	if(triggerTableName == prereqsGeneratedDoc_ &&
+	   triggerTableVersion == prereqsGeneratedTag_)
+	{
+		__COUTS__(10) << "initPrereqsForARTDAQ() already generated for '"
+		              << triggerTableName << "' v" << triggerTableVersion << __E__;
+		return;  //done!
+	}
+
+	__COUTS__(10) << "initPrereqsForARTDAQ() generating for '" << triggerTableName
+	              << "' v" << triggerTableVersion << " (previously '"
+	              << prereqsGeneratedDoc_ << "' v" << prereqsGeneratedTag_ << ")"
+	              << __E__;
+	__COUTS__(11) << StringMacros::stackTrace() << __E__;
+
+	//make directory just in case
+	mkdir((ARTDAQ_FCL_PATH).c_str(), 0755);
+
 	generateTriggerEpilogs(triggerTableName, triggerTableVersion);
 
-	prereqsGenerated_ = true;
+	prereqsGeneratedDoc_ = triggerTableName;
+	prereqsGeneratedTag_ = triggerTableVersion;
 }  //end initPrereqsForARTDAQ()
 
 //========================================================================================================================
