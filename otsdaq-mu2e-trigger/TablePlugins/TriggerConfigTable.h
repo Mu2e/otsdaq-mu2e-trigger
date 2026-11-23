@@ -33,7 +33,11 @@ private:
 											 const std::string& outputFileName);
 
 	std::mutex			prereqsGeneratedMutex_;
-	bool			 	prereqsGenerated_ = false;
+	// menu document name and tag used for the last generation; regenerate whenever
+	// either changes (e.g. a new triggerMenuTag selected in the Trigger Menu Editor
+	// between Configures). Empty until the first generation in this process.
+	std::string			prereqsGeneratedDoc_;
+	std::string			prereqsGeneratedTag_;
 };
 // clang-format on
 }  // namespace ots
